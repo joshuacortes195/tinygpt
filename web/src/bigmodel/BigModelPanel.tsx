@@ -54,7 +54,7 @@ export function BigModelPanel({ entry, prompt, settings }: Props) {
     setError(null)
     setStatus('loading')
     // the library wants a path on this site, not a full url
-    post({ type: 'load', modelsUrl: new URL(modelsBaseUrl()).pathname, id: entry.path, dtype: entry.dtype })
+    post({ type: 'load', modelsUrl: new URL(modelsBaseUrl()).pathname, id: entry.path, dtype: entry.dtype, bytes: entry.bytes })
   }
 
   function run() {

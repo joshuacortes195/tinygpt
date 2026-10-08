@@ -10,7 +10,7 @@ import {
 } from '@huggingface/transformers'
 
 export type BigRequest =
-  | { type: 'load'; modelsUrl: string; id: string; dtype: string }
+  | { type: 'load'; modelsUrl: string; id: string; dtype: string; bytes: number }
   | { type: 'run'; prompt: string; maxTokens: number; temperature: number; topK: number; topP: number }
   | { type: 'stop' }
 
@@ -35,24 +35,33 @@ async function load(req: Extract<BigRequest, { type: 'load' }>) {
   env.allowLocalModels = true
   env.localModelPath = req.modelsUrl
 
-  // several files download at once, so add their progress together
-  const files = new Map<string, { loaded: number; total: number }>()
+  // the host gzips model files, so the size header is the zipped size and the library crawls
+  // trying to grow its buffer. read each file here and hand it over with its real size
+  let loaded = 0
+  env.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+    const res = await fetch(input, init)
+    const partial = new Headers(init?.headers).has('range')
+    if (!res.ok || !res.body || partial) return res
+    // collect the pieces and report how far along the whole download is
+    const reader = res.body.getReader()
+    const chunks: BlobPart[] = []
+    for (;;) {
+      const { done, value } = await reader.read()
+      if (done) break
+      chunks.push(value)
+      loaded += value.length
+      send({ type: 'progress', loaded: Math.min(loaded, req.bytes), total: req.bytes })
+    }
+    // same response, now with the right length on it
+    const blob = new Blob(chunks)
+    const headers = new Headers(res.headers)
+    headers.set('content-length', String(blob.size))
+    headers.delete('content-encoding')
+    return new Response(blob, { status: res.status, statusText: res.statusText, headers })
+  }
+
   tokenizer = await AutoTokenizer.from_pretrained(req.id)
-  model = await AutoModelForCausalLM.from_pretrained(req.id, {
-    dtype: req.dtype as 'q8',
-    device: 'wasm',
-    progress_callback: (p: { status: string; file?: string; loaded?: number; total?: number }) => {
-      if (p.status !== 'progress' || !p.file) return
-      files.set(p.file, { loaded: p.loaded ?? 0, total: p.total ?? 0 })
-      let loaded = 0
-      let total = 0
-      for (const f of files.values()) {
-        loaded += f.loaded
-        total += f.total
-      }
-      send({ type: 'progress', loaded, total })
-    },
-  })
+  model = await AutoModelForCausalLM.from_pretrained(req.id, { dtype: req.dtype as 'q8', device: 'wasm' })
   send({ type: 'loaded' })
 }
 

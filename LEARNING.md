@@ -235,3 +235,87 @@ Three things made that work without a server:
 - *How do you host an ML demo for free?* Run the model on the visitor's device. The host only serves static files.
 - *How do you avoid the page going stale when the model changes?* Every number on it is read from files the export script writes.
 - *What would you change with a real backend?* Proper response headers for threaded WebAssembly, and a CDN for the model files.
+
+
+## Phase 7: Real training
+
+Same code as the tiny test model, just bigger configs and more steps. Everything ran on one RTX 3060 (12 GB) with mixed precision.
+
+| Model | Parameters | Steps | Tokens seen | Time | Speed | Final val loss |
+| --- | --- | --- | --- | --- | --- | --- |
+| v0 smoke | 0.7M | 6,000 | 25M | 74 s | | 2.377 |
+| small | 10.5M | 25,000 | 410M | 53 min | 134k tokens/sec | 1.342 |
+| base | 27.4M | 36,000 | 590M | 2 h 47 min | 60k tokens/sec | 1.208 |
+
+The training set is 559M tokens, so small saw about three quarters of it once and base saw all of it just over once.
+
+**What the loss means.** Loss is the average surprise per token, in nats. `exp(loss)` is the perplexity: roughly how many tokens the model is choosing between at each step. v0 is at about 10.8, small at 3.8, base at 3.3. A model guessing at random over 4,096 tokens would be at 4,096.
+
+**What the curve looked like.** Base's validation loss went 1.58 at step 4,000, 1.39 at 12,000, 1.30 at 20,000, 1.24 at 28,000 and 1.21 at 36,000. Fast at first, then slow steady gains. Train and validation loss stayed close the whole way, which is what you expect when the model only sees each story about once: it has no chance to memorize. It was still improving when it stopped, so more steps would have helped a little.
+
+**Bigger was better, at a price.** Base has 2.6 times the parameters of small and ran at less than half the speed. It bought a drop from 1.342 to 1.208. The Compare page runs both on the same prompt and seed so you can read the difference for yourself.
+
+**In the browser.** Measured in Chrome on the same desktop, 120 tokens per run:
+
+| Model | Download (fp32 / int8) | WebGPU fp32 | WebAssembly int8 | WebAssembly fp32 |
+| --- | --- | --- | --- | --- |
+| small | 42 MB / 11 MB | 87 tokens/sec | 31 | 22 |
+| base | 110 MB / 28 MB | 76 tokens/sec | 13 | 9 |
+
+- On the GPU the bigger model costs almost nothing. On the CPU it is more than twice as slow, because the CPU feels every extra multiply.
+- The small numbers were taken while the GPU was busy training base, so they are a bit low.
+- The CPU path runs on one thread (see Phase 6), which is why it trails so far behind.
+
+**int8 against fp32.** The int8 file is a quarter of the size and about 45% faster on the CPU. On 20 test prompts it picked the same top token as full precision every time for base, and 95% of the time for small. The raw scores do shift (up to 0.9 on a logit for base), so the probabilities are slightly different, but the stories read the same. That is why the site uses fp32 on WebGPU, where speed is not the problem, and int8 on the CPU, where download size and speed both matter.
+
+**The base file is over GitHub's 100 MB limit.** The export script split it into three parts and the site joins them while downloading. Nothing in the web code had to change to add either model: export, a new entry in `manifest.json`, deploy.
+
+**Questions this answers**
+
+- *How do you know the model is not just memorizing?* Validation loss is measured on stories it never trained on, and it tracks the training loss closely.
+- *What is perplexity?* `exp(loss)`. The number of equally likely choices that would give the same amount of surprise.
+- *Why does a 2.6x bigger model only improve the loss by 10%?* Loss falls roughly with the log of model size and data. Each further gain costs more than the last.
+- *What does quantization cost you?* Here, a 4x smaller file and faster CPU inference for a small shift in probabilities and no change in the top pick on the test prompts.
+- *What would you do with more GPU time?* Train base longer first, since its curve had not gone flat. Then a bigger context window.
+
+
+## Phase 8: Fine-tuning a pretrained model for comparison
+
+The question: how does my from-scratch model compare to taking someone else's pretrained model and adapting it to the same stories?
+
+**The model.** SmolLM2-135M, a 135M parameter model trained on general web text. I picked it over the 360M version so the browser download stays near 165 MB. This is the one place the project uses the Hugging Face libraries, and only to load the pretrained weights. The LoRA code is my own (`model/tinygpt/lora.py`).
+
+**LoRA in plain words.** Instead of changing a big weight matrix `W`, freeze it and learn a small correction next to it: `W + B·A`, where `A` and `B` are two thin matrices (rank 8 here). `B` starts at zero, so at step 0 the model behaves exactly like the original. Only `A` and `B` get gradients.
+
+- Applied to the query and value projections in all 30 layers, 60 matrices in total.
+- 460,800 trainable parameters out of 134.5M. That is 0.34%.
+- When training is done, `B·A` is added into `W` once and thrown away, so the finished model is the same size and speed as the original.
+
+**The run.** 3,000 steps, 12.3M tokens of the same TinyStories text, 24 minutes on the same GPU.
+
+**Results.** The two models use different tokenizers, so loss per token can't be compared directly: a model with bigger tokens has fewer, harder guesses. Dividing by the length of the text instead gives loss per byte, which is fair to both.
+
+| Model | Trained on stories | Val loss per token | Val loss per byte |
+| --- | --- | --- | --- |
+| SmolLM2-135M as downloaded | nothing | 2.131 | 0.518 |
+| SmolLM2-135M + LoRA | 12M tokens, 24 min | 1.666 | 0.405 |
+| small (mine, 10.5M) | 410M tokens, 53 min | 1.342 | 0.337 |
+| base (mine, 27.4M) | 590M tokens, 2 h 47 min | 1.208 | 0.303 |
+
+**What I take from that**
+
+- Fine-tuning is very efficient. Training 0.34% of the weights for 24 minutes on 2% of the data closed about half the gap between the stock model and my best one.
+- On this narrow task the small specialist still wins. My 27M model predicts these stories better than a 135M model that was adapted to them, because every one of its parameters was spent on this one kind of text.
+- The pretrained model knows far more. Ask it about something outside children's stories and it has an answer; mine does not. The comparison only says who is better at TinyStories.
+- A longer fine-tune or a higher rank would likely narrow the gap. I stopped at 24 minutes to keep the whole project inside one afternoon of GPU time.
+
+**In the browser.** The fine-tuned model is optional on the Compare page and nothing downloads until you ask for it. It is exported to ONNX with a key-value cache, quantized to int8 (165 MB) and run through Transformers.js in its own Web Worker. It writes about 19 tokens/sec on the CPU. My base model does 13 on the same CPU path without a cache and 76 on WebGPU.
+
+**A bug that only showed up in production.** The panel loaded in 10 seconds on my machine and hung on the live site. GitHub Pages gzips the model files, so the size header is the zipped size. The library made a buffer that big, then rebuilt and copied the whole thing for every chunk that arrived past the end, tens of megabytes hundreds of times. The fix is in the worker: it reads each file itself and hands the library a response with the real size. Now it loads in about 14 seconds on the live site.
+
+**Questions this answers**
+
+- *What is LoRA and why use it?* A low-rank update trained next to frozen weights. It needs a fraction of the memory and time of full fine-tuning and the result merges back into the original weights.
+- *Why start `B` at zero?* So the model's output is unchanged at the first step and training starts from the pretrained behaviour, not from noise.
+- *How do you compare models with different tokenizers?* Normalize by something both share, like bytes or characters of text.
+- *When would you train from scratch instead of fine-tuning?* When the task is narrow, you have plenty of data for it, and you need the model small. Otherwise fine-tuning gets most of the way for far less compute.

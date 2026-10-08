@@ -34,11 +34,15 @@ text ──> BPE tokenizer ──> token + position embeddings
 - **Data:** [TinyStories](https://huggingface.co/datasets/roneneldan/TinyStories), about 559M tokens of short children's stories.
 - **Browser:** the model is exported to ONNX and run with ONNX Runtime Web in a Web Worker. WebGPU when the browser has it, WebAssembly otherwise.
 
-| Model | Parameters | Layers / heads / width | Context |
-| --- | --- | --- | --- |
-| v0 smoke | 0.7M | 3 / 3 / 96 | 64 |
-| small | 10.5M | 5 / 6 / 384 | 256 |
-| base | 27.4M | 8 / 8 / 512 | 256 |
+| Model | Parameters | Layers / heads / width | Context | Val loss | Training time |
+| --- | --- | --- | --- | --- | --- |
+| v0 smoke | 0.7M | 3 / 3 / 96 | 64 | 2.377 | 74 s |
+| small | 10.5M | 5 / 6 / 384 | 256 | 1.342 | 53 min |
+| base | 27.4M | 8 / 8 / 512 | 256 | 1.208 | 2 h 47 min |
+
+All three were trained on one RTX 3060. In Chrome, base writes about 76 tokens/sec on WebGPU and 13 on the WebAssembly fallback.
+
+**Compared against a pretrained model.** As a side experiment I fine-tuned SmolLM2-135M on the same stories with my own LoRA code (0.34% of its weights, 24 minutes). It is an optional download on the Compare page. Measured per byte of text, my 27M model still predicts these stories better (0.303 against 0.405).
 
 More detail on every part, with the reasoning behind it, is in [LEARNING.md](LEARNING.md).
 
@@ -48,7 +52,7 @@ More detail on every part, with the reasoning behind it, is in [LEARNING.md](LEA
 model/            Python: tokenizer, GPT, training, ONNX export
   tinygpt/        the package
   configs/        smoke.yaml, small.yaml, base.yaml
-  scripts/        prepare_data, train, sample, export_onnx
+  scripts/        prepare_data, train, sample, export_onnx, finetune_lora
   tests/
 web/              React + TypeScript + Vite + Tailwind
   public/models/  manifest.json + one folder per model

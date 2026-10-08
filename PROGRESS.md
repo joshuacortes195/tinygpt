@@ -11,8 +11,8 @@ Last updated: 2026-10-08
 | 4 | Web app core | done |
 | 5 | "Look inside the model" visualizations | done |
 | 6 | "How I built it" page and deployment | done |
-| 7 | Real training | running (started early, see below) |
-| 8 | Fine-tuned comparison model (stretch) | in progress (see below) |
+| 7 | Real training | done |
+| 8 | Fine-tuned comparison model (stretch) | done |
 
 ## Decisions
 
@@ -38,30 +38,14 @@ Last updated: 2026-10-08
 
 **Phase 6.** Build page (stats, loss curve and architecture all read from the model's files), `TRAINING.md`, README. Live at https://joshuacortes195.github.io/tinygpt/ running v0. Deploy with `npm run deploy` from `web/`. Verified against the live URL in headless Chrome.
 
-## Phase 7 status (training)
+**Phase 7.** small: 25,000 steps, 53 minutes, val loss 1.342. base: 36,000 steps, 2 h 47 min, val loss 1.208. Both exported (fp32 + int8) and live, base is the default. In Chrome on the desktop, base does 76 tokens/sec on WebGPU, 13 on WebAssembly int8 and 9 on WebAssembly fp32. Full numbers are in LEARNING.md.
 
-Both runs were launched in one background command from `model/`:
+**Phase 8.** SmolLM2-135M fine-tuned with my own LoRA code (rank 8, 0.34% of the weights, 3,000 steps, 24 minutes). Val loss went from 2.131 to 1.666 per token. Per byte that is 0.405 against 0.303 for base, so the from-scratch model still wins on this data. Exported to ONNX (165 MB, int8) and offered as an optional download on the Compare page, where it runs at about 19 tokens/sec on the CPU.
 
-```
-python scripts/train.py configs/small.yaml   # log: runs/small.log, metrics: runs/small/metrics.jsonl
-python scripts/train.py configs/base.yaml    # log: runs/base.log,  metrics: runs/base/metrics.jsonl
-```
+## How to retrain or add a model
 
-- **small is done** (val loss 1.342, 53 minutes), exported and live as the default model. In the browser: 87 tokens/sec on WebGPU, 31 on WebAssembly int8, 22 on WebAssembly fp32.
-- **base started at 13:10 on 2026-10-08** and should finish around 16:00. When it does: export it with `--default` (command in TRAINING.md), run the fine-tune from Phase 8, deploy, then write the Phase 7 and 8 results into LEARNING.md.
-- Do not run the fine-tune while base is training. Together they fill the 12 GB of GPU memory and both crawl.
-- A run is finished when the last line of its `metrics.jsonl` has `"step"` equal to `max_steps` and a `val_loss`.
-- If a run died part way, restart it with `--resume` (it continues from `runs/<name>/ckpt.pt`).
-- After each finishes: export with `scripts/export_onnx.py`, add to the manifest, redeploy.
-
-## Phase 8 status (fine-tuned comparison model)
-
-- Model: SmolLM2-135M (not 360M), so the browser download stays near 165 MB.
-- Done and tested: `model/tinygpt/lora.py`, `scripts/finetune_lora.py`, `scripts/export_finetuned.py`, and the optional panel on the Compare page (loads through Transformers.js only when asked).
-- Still to do, once the GPU is free after the base run: `python scripts/finetune_lora.py` (from `model/`), then `python scripts/export_finetuned.py`, then `npm run deploy` from `web/`, then the write-up in LEARNING.md.
-
+Follow TRAINING.md. A run is finished when the last line of `model/runs/<name>/metrics.jsonl` has `"step"` equal to `max_steps` and a `val_loss`. If a run died part way, restart it with `--resume`. Don't run two GPU jobs at once: together they fill the 12 GB of GPU memory and both crawl.
 ## Open items
-
 
 - **CI workflow is not on GitHub yet.** The saved GitHub login doesn't have the `workflow` permission, so pushing `.github/workflows/ci.yml` is rejected. The file is committed on the local `ci` branch. To turn CI on: run `gh auth refresh -s workflow`, then `git checkout main && git merge ci && git push`.
 - Safari can't be tested from this Windows machine. Chrome and Edge are covered; Safari needs a check on a Mac or iPhone.
