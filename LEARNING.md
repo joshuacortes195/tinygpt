@@ -226,7 +226,7 @@ Three things made that work without a server:
 - **Hash routing.** Pages are `#/compare` and `#/build`. A static host only has one real file, so there is nothing to configure for deep links.
 - **Big files split at export.** GitHub rejects files over 100 MB and the base model's full-precision file is bigger than that. The export script cuts large files into 45 MB parts and lists them in `config.json`; the downloader fetches them in order and joins them.
 
-**Checked in production.** A script drives headless Chrome against the live URL: it waits for the model to load, generates text, opens every tab, and reports any console errors. The `.wasm` runtime and the `.onnx` files are served correctly by GitHub Pages.
+**Checked in production.** `npm run e2e -- <url>` drives headless Chrome against the live URL at desktop and phone sizes: it waits for the model to load, generates text, opens every tab and page, and fails on any console error or sideways scroll. The `.wasm` runtime and the `.onnx` files are served correctly by GitHub Pages.
 
 **One limit of static hosting.** Multi-threaded WebAssembly needs special HTTP headers (cross-origin isolation) that GitHub Pages can't send, so the CPU fallback runs on one thread. WebGPU is not affected.
 
