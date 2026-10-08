@@ -47,6 +47,9 @@ python scripts/train.py configs/small.yaml   # log: runs/small.log, metrics: run
 python scripts/train.py configs/base.yaml    # log: runs/base.log,  metrics: runs/base/metrics.jsonl
 ```
 
+- **small is done** (val loss 1.342, 53 minutes), exported and live as the default model. In the browser: 87 tokens/sec on WebGPU, 31 on WebAssembly int8, 22 on WebAssembly fp32.
+- **base started at 13:10 on 2026-10-08** and should finish around 16:00. When it does: export it with `--default` (command in TRAINING.md), run the fine-tune from Phase 8, deploy, then write the Phase 7 and 8 results into LEARNING.md.
+- Do not run the fine-tune while base is training. Together they fill the 12 GB of GPU memory and both crawl.
 - A run is finished when the last line of its `metrics.jsonl` has `"step"` equal to `max_steps` and a `val_loss`.
 - If a run died part way, restart it with `--resume` (it continues from `runs/<name>/ckpt.pt`).
 - After each finishes: export with `scripts/export_onnx.py`, add to the manifest, redeploy.
