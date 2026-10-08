@@ -62,7 +62,6 @@ python scripts/train.py configs/base.yaml    # log: runs/base.log,  metrics: run
 
 ## Open items
 
-- **README demo GIF** is a placeholder (`docs/demo.gif`). Record one from the live site.
 
 - **CI workflow is not on GitHub yet.** The saved GitHub login doesn't have the `workflow` permission, so pushing `.github/workflows/ci.yml` is rejected. The file is committed on the local `ci` branch. To turn CI on: run `gh auth refresh -s workflow`, then `git checkout main && git merge ci && git push`.
 - Safari can't be tested from this Windows machine. Chrome and Edge are covered; Safari needs a check on a Mac or iPhone.

@@ -4,7 +4,6 @@ A GPT-style language model I built from scratch: my own tokenizer, my own transf
 
 **Try it: https://joshuacortes195.github.io/tinygpt/**
 
-<!-- TODO: record a short GIF of the playground and save it as docs/demo.gif -->
 ![Demo of the playground](docs/demo.gif)
 
 ## What it does
