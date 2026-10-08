@@ -1,0 +1,28 @@
+# tiny model for checking that everything works, trains on a cpu in minutes
+name: smoke
+data_dir: data
+out_dir: runs/smoke
+
+model:
+  vocab_size: 4096
+  block_size: 64
+  n_layer: 3
+  n_head: 3
+  n_embd: 96
+  dropout: 0.0
+
+train:
+  batch_size: 64
+  grad_accum: 1
+  max_steps: 6000
+  lr: 0.001
+  min_lr: 0.0001
+  warmup_steps: 100
+  weight_decay: 0.1
+  grad_clip: 1.0
+  eval_interval: 500
+  eval_batches: 40
+  log_interval: 100
+  seed: 1337
+  compile: false
+  device: auto

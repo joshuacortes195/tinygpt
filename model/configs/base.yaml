@@ -1,0 +1,28 @@
+# about 27M params, the final run on the desktop gpu
+name: base
+data_dir: data
+out_dir: runs/base
+
+model:
+  vocab_size: 4096
+  block_size: 256
+  n_layer: 8
+  n_head: 8
+  n_embd: 512
+  dropout: 0.0
+
+train:
+  batch_size: 64
+  grad_accum: 1
+  max_steps: 36000
+  lr: 0.0006
+  min_lr: 0.00006
+  warmup_steps: 1000
+  weight_decay: 0.1
+  grad_clip: 1.0
+  eval_interval: 1000
+  eval_batches: 50
+  log_interval: 100
+  seed: 1337
+  compile: false
+  device: auto
