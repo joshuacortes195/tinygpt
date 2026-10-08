@@ -43,7 +43,7 @@ python scripts\train.py configs\base.yaml
 | Config | Params | Steps | Speed | Time | VRAM |
 | --- | --- | --- | --- | --- | --- |
 | small | 10.5M | 25,000 | ~134k tokens/sec | ~50 min | about 3 GB |
-| base | 27.4M | 36,000 | ~60k tokens/sec | ~2h 45m | about 4 GB |
+| base | 27.4M | 36,000 | ~60k tokens/sec | ~2h 45m | about 5 GB |
 
 Each step is 64 sequences of 256 tokens. To train longer, raise `max_steps` in the YAML. One pass over the dataset is about 34,000 steps.
 
