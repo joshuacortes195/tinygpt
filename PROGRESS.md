@@ -12,7 +12,7 @@ Last updated: 2026-10-08
 | 5 | "Look inside the model" visualizations | done |
 | 6 | "How I built it" page and deployment | done |
 | 7 | Real training | running (started early, see below) |
-| 8 | Fine-tuned comparison model (stretch) | not started |
+| 8 | Fine-tuned comparison model (stretch) | in progress (see below) |
 
 ## Decisions
 
@@ -50,6 +50,12 @@ python scripts/train.py configs/base.yaml    # log: runs/base.log,  metrics: run
 - A run is finished when the last line of its `metrics.jsonl` has `"step"` equal to `max_steps` and a `val_loss`.
 - If a run died part way, restart it with `--resume` (it continues from `runs/<name>/ckpt.pt`).
 - After each finishes: export with `scripts/export_onnx.py`, add to the manifest, redeploy.
+
+## Phase 8 status (fine-tuned comparison model)
+
+- Model: SmolLM2-135M (not 360M), so the browser download stays near 165 MB.
+- Done and tested: `model/tinygpt/lora.py`, `scripts/finetune_lora.py`, `scripts/export_finetuned.py`, and the optional panel on the Compare page (loads through Transformers.js only when asked).
+- Still to do, once the GPU is free after the base run: `python scripts/finetune_lora.py` (from `model/`), then `python scripts/export_finetuned.py`, then `npm run deploy` from `web/`, then the write-up in LEARNING.md.
 
 ## Open items
 

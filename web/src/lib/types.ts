@@ -7,9 +7,16 @@ export interface ManifestEntry {
   path: string
 }
 
+// an optional bigger model that runs through transformers.js and only loads when asked
+export interface ExtraEntry extends ManifestEntry {
+  dtype: string
+  bytes: number
+}
+
 export interface Manifest {
   default: string
   models: ManifestEntry[]
+  extras?: ExtraEntry[]
 }
 
 // a model file is either one file or several parts that get glued together

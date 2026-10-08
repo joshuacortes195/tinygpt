@@ -1,16 +1,18 @@
 import { PlayIcon, StopIcon } from '@phosphor-icons/react'
 import { useId, useMemo, useState } from 'react'
+import { BigModelPanel } from '../bigmodel/BigModelPanel'
 import { ModelPicker } from '../components/ModelPicker'
 import { TextView } from '../components/OutputViews'
 import { SettingsPanel } from '../components/SettingsPanel'
 import { useGeneration } from '../hooks/useGeneration'
 import { useModel } from '../hooks/useModel'
 import { formatCount } from '../lib/format'
-import { DEFAULT_SETTINGS, type ManifestEntry, type SamplingSettings } from '../lib/types'
+import { DEFAULT_SETTINGS, type ExtraEntry, type ManifestEntry, type SamplingSettings } from '../lib/types'
 
 interface Props {
   models: ManifestEntry[]
   defaultId: string
+  extras: ExtraEntry[]
 }
 
 // one side of the comparison: its own model, its own output
@@ -24,7 +26,7 @@ function useSide(models: ManifestEntry[], initialId: string) {
   return { id, setId, state, model, generation, retry: () => setRetry((n) => n + 1) }
 }
 
-export function Compare({ models, defaultId }: Props) {
+export function Compare({ models, defaultId, extras }: Props) {
   const promptId = useId()
   // start with two different models when there are at least two
   const otherId = models.find((m) => m.id !== defaultId)?.id ?? defaultId
@@ -90,6 +92,11 @@ export function Compare({ models, defaultId }: Props) {
         <Side title="Model A" models={models} side={left} disabled={running} />
         <Side title="Model B" models={models} side={right} disabled={running} />
       </div>
+
+      {/* optional bigger models, each behind its own download button */}
+      {extras.map((extra) => (
+        <BigModelPanel key={extra.id} entry={extra} prompt={prompt} settings={settings} />
+      ))}
 
       <details className="border-t border-border pt-4">
         <summary className="cursor-pointer py-2 text-sm font-semibold">Sampling settings</summary>

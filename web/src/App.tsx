@@ -3,7 +3,7 @@ import { Header, type Page } from './components/Header'
 import { REPO_URL } from './lib/links'
 import { loadManifest } from './lib/manifest'
 import { MOCK_ENTRY } from './lib/models'
-import type { ManifestEntry } from './lib/types'
+import type { ExtraEntry, ManifestEntry } from './lib/types'
 import { Build } from './pages/Build'
 import { Compare } from './pages/Compare'
 import { Playground } from './pages/Playground'
@@ -18,7 +18,7 @@ function pageFromHash(): Page {
 
 type ManifestState =
   | { status: 'loading' }
-  | { status: 'ready'; models: ManifestEntry[]; defaultId: string }
+  | { status: 'ready'; models: ManifestEntry[]; defaultId: string; extras: ExtraEntry[] }
   | { status: 'error'; message: string }
 
 export default function App() {
@@ -47,13 +47,13 @@ export default function App() {
       .then((m) => {
         const models = wantMock ? [...m.models, MOCK_ENTRY] : m.models
         const defaultId = models.some((x) => x.id === m.default) ? m.default : (models[0]?.id ?? '')
-        setManifest({ status: 'ready', models, defaultId })
+        setManifest({ status: 'ready', models, defaultId, extras: m.extras ?? [] })
         setSelectedId(wantMock ? MOCK_ENTRY.id : defaultId)
       })
       .catch((err: unknown) => {
         // with ?mock=1 the site still works with no model files at all
         if (wantMock) {
-          setManifest({ status: 'ready', models: [MOCK_ENTRY], defaultId: MOCK_ENTRY.id })
+          setManifest({ status: 'ready', models: [MOCK_ENTRY], defaultId: MOCK_ENTRY.id, extras: [] })
           setSelectedId(MOCK_ENTRY.id)
         } else {
           setManifest({ status: 'error', message: err instanceof Error ? err.message : String(err) })
@@ -109,7 +109,7 @@ export default function App() {
               )}
             </div>
             <div hidden={page !== 'compare'}>
-              {visited.has('compare') && <Compare models={manifest.models} defaultId={manifest.defaultId} />}
+              {visited.has('compare') && <Compare models={manifest.models} defaultId={manifest.defaultId} extras={manifest.extras} />}
             </div>
             <div hidden={page !== 'build'}>
               {visited.has('build') && <Build models={manifest.models} defaultId={manifest.defaultId} />}
