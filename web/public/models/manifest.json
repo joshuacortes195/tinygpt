@@ -1,0 +1,11 @@
+{
+  "default": "v0-smoke",
+  "models": [
+    {
+      "id": "v0-smoke",
+      "name": "v0 smoke (0.7M)",
+      "description": "Tiny test model trained for a couple of minutes. Proves the pipeline works.",
+      "path": "v0-smoke"
+    }
+  ]
+}
