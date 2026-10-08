@@ -207,3 +207,31 @@ The output panel has four tabs. Each one shows the same generated text from a di
 - *Why can a model pick a token that was not its top guess?* Sampling. With temperature above 0 the model rolls dice weighted by probability, which is what keeps the writing from looping.
 - *Why not always take the most likely token?* Greedy decoding gets repetitive quickly. Set temperature to 0 in the playground to see it happen.
 - *What does low probability on a token tell you?* That the model was choosing between many reasonable options there, like a character's name, as opposed to a spot where grammar forces the answer.
+
+
+## Phase 6: The build page and deployment
+
+**"How I built it" page.** Nothing on it is typed in by hand. The stats table reads `config.json`, the loss chart reads `metrics.json`, and the architecture diagram fills in layer counts and widths from the same config. Pick a different model and every number changes with it, so the page was correct for the tiny v0 model and stays correct when bigger models are added.
+
+**Deployment.** The site is a static build pushed to a `gh-pages` branch and served by GitHub Pages:
+
+```
+cd web
+npm run deploy
+```
+
+Three things made that work without a server:
+
+- **Relative paths.** Vite's `base` is `./` and the app finds its models relative to the page, so the same build works at a domain root, in a subfolder like `/tinygpt/`, or on another static host.
+- **Hash routing.** Pages are `#/compare` and `#/build`. A static host only has one real file, so there is nothing to configure for deep links.
+- **Big files split at export.** GitHub rejects files over 100 MB and the base model's full-precision file is bigger than that. The export script cuts large files into 45 MB parts and lists them in `config.json`; the downloader fetches them in order and joins them.
+
+**Checked in production.** A script drives headless Chrome against the live URL: it waits for the model to load, generates text, opens every tab, and fails on any console error. The `.wasm` runtime and the `.onnx` files are served correctly by GitHub Pages.
+
+**One limit of static hosting.** Multi-threaded WebAssembly needs special HTTP headers (cross-origin isolation) that GitHub Pages can't send, so the CPU fallback runs on one thread. WebGPU is not affected.
+
+**Questions this answers**
+
+- *How do you host an ML demo for free?* Run the model on the visitor's device. The host only serves static files.
+- *How do you avoid the page going stale when the model changes?* Every number on it is read from files the export script writes.
+- *What would you change with a real backend?* Proper response headers for threaded WebAssembly, and a CDN for the model files.

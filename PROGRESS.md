@@ -10,7 +10,7 @@ Last updated: 2026-10-08
 | 3 | ONNX export and parity | done |
 | 4 | Web app core | done |
 | 5 | "Look inside the model" visualizations | done |
-| 6 | "How I built it" page and deployment | not started |
+| 6 | "How I built it" page and deployment | done |
 | 7 | Real training | running (started early, see below) |
 | 8 | Fine-tuned comparison model (stretch) | not started |
 
@@ -36,6 +36,8 @@ Last updated: 2026-10-08
 
 **Phase 5.** Token, probability and attention views inside the playground's output panel, plus a Compare page. All work with v0, and the attention view degrades when a model has no attention output.
 
+**Phase 6.** Build page (stats, loss curve and architecture all read from the model's files), `TRAINING.md`, README. Live at https://joshuacortes195.github.io/tinygpt/ running v0. Deploy with `npm run deploy` from `web/`. Verified against the live URL in headless Chrome.
+
 ## Phase 7 status (training)
 
 Both runs were launched in one background command from `model/`:
@@ -50,6 +52,8 @@ python scripts/train.py configs/base.yaml    # log: runs/base.log,  metrics: run
 - After each finishes: export with `scripts/export_onnx.py`, add to the manifest, redeploy.
 
 ## Open items
+
+- **README demo GIF** is a placeholder (`docs/demo.gif`). Record one from the live site.
 
 - **CI workflow is not on GitHub yet.** The saved GitHub login doesn't have the `workflow` permission, so pushing `.github/workflows/ci.yml` is rejected. The file is committed on the local `ci` branch. To turn CI on: run `gh auth refresh -s workflow`, then `git checkout main && git merge ci && git push`.
 - Safari can't be tested from this Windows machine. Chrome and Edge are covered; Safari needs a check on a Mac or iPhone.
