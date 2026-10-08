@@ -1,0 +1,32 @@
+{
+  "name": "Small (10.5M)",
+  "description": "First real run. 25,000 steps, about 50 minutes on one GPU.",
+  "vocab_size": 4096,
+  "block_size": 256,
+  "n_layer": 5,
+  "n_head": 6,
+  "n_embd": 384,
+  "params": 10544256,
+  "training_tokens": 409600000,
+  "training_steps": 25000,
+  "training_seconds": 3165.823789834976,
+  "final_val_loss": 1.34184,
+  "has_attention": true,
+  "files": {
+    "fp32": {
+      "file": "model.onnx",
+      "bytes": 42303070
+    },
+    "int8": {
+      "file": "model.int8.onnx",
+      "bytes": 10796875
+    }
+  },
+  "parity": {
+    "fp32_max_logit_diff": 2.0503997802734375e-05,
+    "fp32_max_attention_diff": 7.12275505065918e-06,
+    "inputs": 20,
+    "int8_top1_agreement": 0.95,
+    "int8_max_logit_diff": 1.1719837188720703
+  }
+}
