@@ -19,5 +19,15 @@
       "description": "The full model. About 3 hours on one GPU.",
       "path": "base"
     }
+  ],
+  "extras": [
+    {
+      "id": "smollm2-stories",
+      "name": "SmolLM2-135M + LoRA",
+      "description": "A pretrained 135M model, fine-tuned on the same stories with LoRA. Not built from scratch, here for comparison.",
+      "path": "smollm2-stories",
+      "dtype": "q8",
+      "bytes": 164919257
+    }
   ]
 }
