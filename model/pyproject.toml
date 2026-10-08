@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tinygpt"
+version = "0.1.0"
+description = "A small GPT written from scratch"
+requires-python = ">=3.10"
+# torch is left out on purpose, install the build that matches your machine first (see README)
+dependencies = ["numpy", "regex", "pyyaml", "tqdm"]
+
+[project.optional-dependencies]
+dev = ["pytest", "onnx", "onnxruntime"]
+
+[tool.setuptools]
+packages = ["tinygpt"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
