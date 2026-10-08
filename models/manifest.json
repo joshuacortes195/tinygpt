@@ -1,5 +1,5 @@
 {
-  "default": "small",
+  "default": "base",
   "models": [
     {
       "id": "v0-smoke",
@@ -12,6 +12,12 @@
       "name": "Small (10.5M)",
       "description": "First real run. 25,000 steps, about 50 minutes on one GPU.",
       "path": "small"
+    },
+    {
+      "id": "base",
+      "name": "Base (27M)",
+      "description": "The full model. About 3 hours on one GPU.",
+      "path": "base"
     }
   ]
 }
