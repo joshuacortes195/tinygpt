@@ -1,1 +1,275 @@
 @import 'tailwindcss';
+@import '@fontsource-variable/geist';
+@import '@fontsource-variable/geist-mono';
+
+/* dark mode follows the data-theme attribute on <html> */
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+/* light theme colors */
+:root {
+  --bg: oklch(0.982 0.003 250);
+  --surface: oklch(0.997 0.001 250);
+  --surface-2: oklch(0.962 0.004 250);
+  --border: oklch(0.905 0.006 250);
+  --border-strong: oklch(0.82 0.008 250);
+  --text: oklch(0.21 0.012 255);
+  --muted: oklch(0.47 0.014 255);
+  --accent: oklch(0.56 0.19 36);
+  --accent-fg: oklch(0.99 0.005 60);
+  --accent-soft: oklch(0.94 0.04 45);
+  --danger: oklch(0.52 0.19 25);
+  --heat: 0.56 0.19 36;
+  --tok-l: 0.925;
+  --tok-c: 0.055;
+  --shadow: 0 1px 2px oklch(0.3 0.02 255 / 0.06), 0 8px 24px -12px oklch(0.3 0.02 255 / 0.18);
+  color-scheme: light;
+}
+
+/* dark theme colors */
+[data-theme='dark'] {
+  --bg: oklch(0.165 0.007 255);
+  --surface: oklch(0.2 0.008 255);
+  --surface-2: oklch(0.245 0.009 255);
+  --border: oklch(0.295 0.01 255);
+  --border-strong: oklch(0.4 0.012 255);
+  --text: oklch(0.95 0.004 255);
+  --muted: oklch(0.72 0.012 255);
+  --accent: oklch(0.74 0.16 48);
+  --accent-fg: oklch(0.18 0.02 45);
+  --accent-soft: oklch(0.32 0.06 45);
+  --danger: oklch(0.72 0.16 25);
+  --heat: 0.74 0.16 48;
+  --tok-l: 0.34;
+  --tok-c: 0.06;
+  --shadow: 0 1px 2px oklch(0 0 0 / 0.3), 0 12px 32px -12px oklch(0 0 0 / 0.6);
+  color-scheme: dark;
+}
+
+/* hooks the colors and fonts into tailwind class names */
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
+  --color-accent-soft: var(--accent-soft);
+  --color-danger: var(--danger);
+  --font-sans: 'Geist Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'Geist Mono Variable', ui-monospace, 'SF Mono', Menlo, monospace;
+  --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/* page basics */
+html {
+  background: var(--bg);
+  color: var(--text);
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  font-family: var(--font-sans);
+  font-feature-settings: 'ss01', 'cv11';
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* same focus ring everywhere */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+::selection {
+  background: var(--accent-soft);
+}
+
+@layer components {
+/* styling for buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  padding: 0 1rem;
+  border-radius: 8px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition:
+    transform 140ms var(--ease-out-strong),
+    background-color 140ms ease,
+    border-color 140ms ease;
+}
+
+.btn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* the main action button */
+.btn-primary {
+  border-color: transparent;
+  background: var(--accent);
+  color: var(--accent-fg);
+}
+
+/* quiet button for secondary actions */
+.btn-ghost {
+  border-color: transparent;
+  background: transparent;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .btn:hover:not(:disabled) {
+    border-color: var(--text);
+  }
+  .btn-primary:hover:not(:disabled) {
+    border-color: transparent;
+    background: color-mix(in oklch, var(--accent) 88%, var(--text));
+  }
+  .btn-ghost:hover:not(:disabled) {
+    border-color: transparent;
+    background: var(--surface-2);
+  }
+}
+
+/* styling for text boxes and dropdowns */
+.field {
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.625rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 1rem;
+  transition: border-color 140ms ease;
+}
+
+.field:focus-visible {
+  outline-offset: 0;
+  border-color: var(--accent);
+}
+
+/* styling for sliders */
+.slider {
+  width: 100%;
+  height: 1.75rem;
+  margin: 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+  touch-action: pan-y;
+}
+
+/* boxed sections */
+.panel {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+/* small label text above controls */
+.label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+/* numbers line up in columns */
+.num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* colored token chips, the hue comes from --h on the element */
+.tok {
+  background: oklch(var(--tok-l) var(--tok-c) var(--h, 250));
+  border-radius: 4px;
+}
+
+/* each new token fades in as the model writes it */
+.tok-new {
+  animation: tok-in 180ms var(--ease-out-strong);
+}
+
+@keyframes tok-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* blinking cursor while the model is writing */
+.caret {
+  display: inline-block;
+  width: 0.5em;
+  height: 1.05em;
+  margin-left: 1px;
+  vertical-align: text-bottom;
+  background: var(--accent);
+  animation: caret 1s steps(2, start) infinite;
+}
+
+@keyframes caret {
+  to {
+    visibility: hidden;
+  }
+}
+
+/* panels that open under a control fade and settle into place */
+.reveal {
+  animation: reveal 200ms var(--ease-out-strong);
+}
+
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+/* loading placeholder shimmer */
+.skeleton {
+  border-radius: 6px;
+  background: linear-gradient(90deg, var(--surface-2) 25%, var(--border) 50%, var(--surface-2) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.2s linear infinite;
+}
+
+@keyframes shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+}
+
+/* people who asked for less motion get none of the movement */
+@media (prefers-reduced-motion: reduce) {
+  .tok-new,
+  .reveal,
+  .skeleton,
+  .caret {
+    animation: none;
+  }
+  .btn {
+    transition: none;
+  }
+}

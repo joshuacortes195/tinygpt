@@ -95,6 +95,26 @@ def check_parity(model, fp32_path, int8_path=None, samples=None, n=20, seed=0):
     return report
 
 
+# github refuses files over 100 MB, so big files get cut into parts the site glues back together
+def split_file(path, part_bytes=45_000_000):
+    path = Path(path)
+    size = path.stat().st_size
+    if size <= part_bytes:
+        return {"file": path.name, "bytes": size}
+    parts = []
+    with open(path, "rb") as f:
+        while True:
+            chunk = f.read(part_bytes)
+            if not chunk:
+                break
+            name = f"{path.name}.part{len(parts)}"
+            (path.parent / name).write_bytes(chunk)
+            parts.append(name)
+    # the whole file is not needed once the parts exist
+    path.unlink()
+    return {"parts": parts, "bytes": size}
+
+
 # shrinks metrics.jsonl down to something a chart can load fast
 def downsample_metrics(metrics_path, max_points=200):
     rows = []
@@ -145,10 +165,7 @@ def export_model_folder(model, ckpt, tokenizer_path, metrics_path, out_dir, name
         "training_seconds": ckpt.get("elapsed"),
         "final_val_loss": val_points[-1]["loss"] if val_points else None,
         "has_attention": True,
-        "files": {
-            "fp32": {"file": fp32_path.name, "bytes": fp32_path.stat().st_size},
-            "int8": {"file": int8_path.name, "bytes": int8_path.stat().st_size},
-        },
+        "files": {"fp32": split_file(fp32_path), "int8": split_file(int8_path)},
         "parity": parity,
     }
     (out_dir / "config.json").write_text(json.dumps(config, indent=2), encoding="utf-8")

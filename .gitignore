@@ -14,7 +14,6 @@ model/runs/
 # web
 node_modules/
 web/dist/
-web/public/ort/
 
 # big model files live in a github release, not in git
 web/public/models/small/

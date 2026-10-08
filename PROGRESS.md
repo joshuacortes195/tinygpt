@@ -8,8 +8,8 @@ Last updated: 2026-10-08
 | 1 | Byte-level BPE tokenizer (Python + TypeScript) | done |
 | 2 | GPT model and training loop | done |
 | 3 | ONNX export and parity | done |
-| 4 | Web app core | not started |
-| 5 | "Look inside the model" visualizations | not started |
+| 4 | Web app core | done |
+| 5 | "Look inside the model" visualizations | done |
 | 6 | "How I built it" page and deployment | not started |
 | 7 | Real training | running (started early, see below) |
 | 8 | Fine-tuned comparison model (stretch) | not started |
@@ -31,6 +31,10 @@ Last updated: 2026-10-08
 **Phase 2.** GPT model, trainer, three configs, sampling script. v0 smoke model: 735k params, 6,000 steps, val loss 2.38, 74 seconds on the GPU.
 
 **Phase 3.** ONNX export (fp32 + int8) with parity checks. v0 exported to `web/public/models/v0-smoke/` and listed in `manifest.json`. fp32 max logit diff 1.3e-5, int8 top-1 agreement 100%.
+
+**Phase 4.** Playground with model picker, streaming output, sliders, seed, Stop. `TextGenerator` interface with a mock and a Web Worker ONNX implementation (WebGPU first, WebAssembly fallback). Tested in headless Chrome at desktop and phone sizes, light and dark, on both backends.
+
+**Phase 5.** Token, probability and attention views inside the playground's output panel, plus a Compare page. All work with v0, and the attention view degrades when a model has no attention output.
 
 ## Phase 7 status (training)
 

@@ -140,3 +140,70 @@ Exporting is a translation, so it gets tested like one. The same inputs go throu
 - *What is quantization and what does it cost?* Storing each weight in 8 bits instead of 32. The file is about 4x smaller and CPU inference is faster, but the outputs shift a little. I measure the shift instead of assuming it is fine.
 - *What is a KV cache and why skip it?* See above: a speed optimization that trades simplicity for linear-time generation.
 - *How do you know the exported model is the same model?* Numeric parity against PyTorch across many sequence lengths, run as a test and again on every real export.
+
+
+## Phase 4: The web app
+
+The website is a static React app. There is no backend: the browser downloads the model file and runs it locally with ONNX Runtime Web.
+
+**The one interface everything hangs on** (`web/src/generator/types.ts`)
+
+```ts
+interface TextGenerator {
+  load(onProgress): Promise<void>
+  nextLogits(ids: number[]): Promise<Float32Array>   // scores for the next token
+  attention?(ids: number[]): Promise<AttentionData>  // optional
+}
+```
+
+The UI only ever talks to this. Two things implement it:
+
+- `MockGenerator`: instant and deterministic. The tests use it, and adding `?mock=1` to the URL puts it in the model picker, so the whole site works with no model files at all.
+- `OnnxGenerator`: the real one. It is a thin wrapper that posts messages to a **Web Worker**, and the worker owns the ONNX session.
+
+**Why a worker.** Running the model is heavy math. On the main thread it would freeze scrolling, the Stop button and the text streaming in. In a worker the page stays responsive and Stop works the moment you press it.
+
+**Picking a backend.** The worker tries WebGPU with the full-precision file first. If the browser has no GPU support, or creating the session fails, it falls back to WebAssembly on the CPU with the 8-bit file, which is a quarter of the download. It runs one tiny input before reporting success, so a backend that loads but can't actually run never reaches the user. `?backend=wasm&precision=fp32` forces a combination for benchmarking.
+
+**Sampling happens in TypeScript.** The model only returns scores. Temperature, top-k and top-p are applied in `web/src/lib/sampling.ts`, mirroring the Python version, with a small seeded random number generator so the same seed always gives the same story.
+
+**The manifest is the only source of truth.** `public/models/manifest.json` lists the models. Each model folder describes itself in `config.json`, including which files exist and how big they are. The app has no model names or sizes in its code, so adding a model is a folder plus one manifest entry. Files over GitHub's 100 MB limit are split into parts at export time and the downloader stitches them back together.
+
+**States that are easy to forget.** Download progress with real byte counts, a skeleton while the model starts, a clear message with a retry button when a browser can't run it, and an empty state that says what to do.
+
+**First numbers** (v0 model, headless Chrome on my desktop): about 100 tokens/sec on WebGPU and about 190 tokens/sec on WebAssembly with the 8-bit file. For a model this small the CPU wins, because each WebGPU call has a fixed overhead that is bigger than the math itself. Bigger models flip that (see Phase 7).
+
+**Questions this answers**
+
+- *Why run the model in a Web Worker?* Inference blocks whatever thread it is on. The worker keeps the page responsive and makes Stop instant.
+- *How does the site work before the real model exists?* Everything is written against an interface, with a mock behind it. Swapping in a trained model changes data files, not code.
+- *WebGPU or WebAssembly?* WebGPU is much faster for big matrices but has per-call overhead and isn't everywhere. WebAssembly runs everywhere. The app tries the GPU and falls back.
+- *How is generation reproducible in the browser?* A seeded PRNG drives the sampling, so prompt + settings + seed fully determine the output.
+- *Why sample in JS instead of inside the ONNX graph?* It keeps the graph simple, lets the UI show the raw probabilities, and lets the sliders change without re-exporting anything.
+
+
+## Phase 5: Looking inside the model
+
+The output panel has four tabs. Each one shows the same generated text from a different angle.
+
+- **Text.** The story, streaming in token by token.
+- **Tokens.** Every token as a colored chip with its id. Spaces show as dots, so you can see that `" girl"` with its leading space is one token. The same token always gets the same color.
+- **Probabilities.** Each generated token is shaded by how unsure the model was. Tapping one shows the top 10 candidates at that step with their probabilities. These are the model's raw probabilities, before temperature or top-k change anything.
+- **Attention.** Pick a layer and a head, then tap a token. The earlier tokens light up by how much attention that token paid them. A full grid view shows every token against every other token; the empty triangle is the future that the causal mask hides.
+
+**How the data gets there**
+
+- The top 10 for each step is computed when the token is sampled and stored with it, so the probability view costs nothing extra.
+- Attention is not fetched during generation. It is megabytes of numbers per step and nobody is looking at it yet. When the Attention tab opens, the app runs the model once more on the finished text and asks for the attention output that time.
+- Models exported without attention simply don't have the method, and the tab explains that instead of breaking.
+
+**Model comparison.** The Compare page runs one prompt through two models with the same settings and seed, one after the other so each gets the whole machine and the speed numbers are fair.
+
+**Made for phones.** Nothing depends on hover. Tokens are tap targets, the top-10 list sits under the text on a narrow screen instead of in a floating popover, and the attention view leads with highlighted text because a 256 by 256 grid is unreadable on a phone.
+
+**Questions this answers**
+
+- *What does an attention head actually do?* For each token it produces a set of weights over the earlier tokens. Different heads learn different patterns, and you can flip between them to see that.
+- *Why can a model pick a token that was not its top guess?* Sampling. With temperature above 0 the model rolls dice weighted by probability, which is what keeps the writing from looping.
+- *Why not always take the most likely token?* Greedy decoding gets repetitive quickly. Set temperature to 0 in the playground to see it happen.
+- *What does low probability on a token tell you?* That the model was choosing between many reasonable options there, like a character's name, as opposed to a spot where grammar forces the answer.

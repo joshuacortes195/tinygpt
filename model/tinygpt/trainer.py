@@ -192,6 +192,10 @@ def train(cfg, resume=False, stop_at=None, quiet=False):
         if step % t["eval_interval"] == 0 and step > 0:
             last_val = estimate_loss(model, val_data, t, model_cfg.block_size, device, use_amp)
             best_val = min(best_val, last_val)
+            # its own row so the val loss is tied to the exact step it was measured at
+            log({"step": step, "train_loss": None, "val_loss": round(last_val, 5), "lr": get_lr(step, t),
+                 "tokens_per_sec": None, "tokens_seen": tokens_seen,
+                 "elapsed": round(elapsed_before + time.time() - start, 1)})
             checkpoint()
             # don't count eval time against tokens per second
             window_start, window_tokens = time.time(), 0
@@ -228,7 +232,7 @@ def train(cfg, resume=False, stop_at=None, quiet=False):
             row = {
                 "step": step,
                 "train_loss": round(loss_sum / t["grad_accum"], 5),
-                "val_loss": None if last_val is None else round(last_val, 5),
+                "val_loss": None,
                 "lr": lr,
                 "tokens_per_sec": round(tps, 1),
                 "tokens_seen": tokens_seen,

@@ -65,3 +65,20 @@ def test_manifest_add_and_update(tmp_path):
     assert m["default"] == "b"
     assert [x["id"] for x in m["models"]] == ["b", "a"]
     assert m["models"][1]["name"] == "A2"
+
+
+# big files become parts that add back up to the original
+def test_split_file(tmp_path):
+    from tinygpt.export import split_file
+
+    small = tmp_path / "small.onnx"
+    small.write_bytes(b"x" * 100)
+    assert split_file(small, part_bytes=1000) == {"file": "small.onnx", "bytes": 100}
+
+    big = tmp_path / "big.onnx"
+    payload = bytes(range(256)) * 10
+    big.write_bytes(payload)
+    info = split_file(big, part_bytes=1000)
+    assert info["bytes"] == len(payload) and len(info["parts"]) == 3
+    assert not big.exists()
+    assert b"".join((tmp_path / p).read_bytes() for p in info["parts"]) == payload
