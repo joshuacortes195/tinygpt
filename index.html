@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="A GPT-style language model built from scratch, with its own tokenizer, transformer and training loop. Try it in your browser and look inside while it writes."
+    />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f8f9fb" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0f1114" />
+    <meta property="og:title" content="TinyGPT" />
+    <meta
+      property="og:description"
+      content="A GPT built from scratch that runs in your browser. See the tokens, the probabilities and the attention."
+    />
+    <title>TinyGPT: a GPT built from scratch, running in your browser</title>
+    <!-- sets the theme before anything paints so there is no flash -->
+    <script>
+      ;(function () {
+        var saved = null
+        try {
+          saved = localStorage.getItem('theme')
+        } catch (e) {}
+        var dark = saved ? saved === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches
+        document.documentElement.dataset.theme = dark ? 'dark' : 'light'
+      })()
+    </script>
+    <script type="module" crossorigin src="./assets/index-Blm8ROPj.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-3R6556IC.css">
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
