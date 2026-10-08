@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { formatPercent, visibleToken } from '../lib/format'
 import type { LoadedModel } from '../lib/models'
 import type { TokenInfo } from '../lib/types'
@@ -277,10 +277,11 @@ function AttentionMatrix({
   row: number
   onPickRow: (row: number) => void
 }) {
-  const [canvas, setCanvas] = useState<HTMLCanvasElement | null>(null)
+  const canvasRef = useRef<HTMLCanvasElement>(null)
 
   // paints one pixel per pair of tokens
   useEffect(() => {
+    const canvas = canvasRef.current
     if (!canvas) return
     const ctx = canvas.getContext('2d')
     if (!ctx) return
@@ -313,14 +314,14 @@ function AttentionMatrix({
       }
     }
     ctx.putImageData(image, 0, 0)
-  }, [canvas, data, offset, size])
+  }, [data, offset, size])
 
   return (
     <details className="group">
       <summary className="cursor-pointer py-2 text-sm font-medium text-text">Full attention grid</summary>
       <div className="mt-2 grid gap-2">
         <canvas
-          ref={setCanvas}
+          ref={canvasRef}
           role="img"
           aria-label="Attention grid. Each row is a token and each column is an earlier token it looked at."
           className="aspect-square w-full max-w-md cursor-crosshair rounded-lg border border-border [image-rendering:pixelated]"

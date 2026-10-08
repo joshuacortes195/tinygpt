@@ -1,5 +1,5 @@
 import { ArrowUpRightIcon } from '@phosphor-icons/react'
-import { useEffect, useId, useState } from 'react'
+import { useEffect, useId, useMemo, useState } from 'react'
 import { ArchitectureDiagram } from '../components/ArchitectureDiagram'
 import { LossChart } from '../components/LossChart'
 import { formatBytes, formatCount, formatDuration } from '../lib/format'
@@ -44,7 +44,7 @@ interface Props {
 
 export function Build({ models, defaultId }: Props) {
   const selectId = useId()
-  const real = models.filter((m) => m.id !== MOCK_ENTRY.id)
+  const real = useMemo(() => models.filter((m) => m.id !== MOCK_ENTRY.id), [models])
   const [id, setId] = useState(real.some((m) => m.id === defaultId) ? defaultId : (real[0]?.id ?? ''))
   const [data, setData] = useState<{ config: ModelConfig; metrics: Metrics | null } | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -66,7 +66,7 @@ export function Build({ models, defaultId }: Props) {
     return () => {
       cancelled = true
     }
-  }, [id])
+  }, [id, real])
 
   const config = data?.config
 
