@@ -1,0 +1,36 @@
+{
+  "name": "Recipes (27M)",
+  "description": "The full model, trained on about 2 million recipes for 3 hours on one GPU.",
+  "vocab_size": 4096,
+  "block_size": 256,
+  "n_layer": 8,
+  "n_head": 8,
+  "n_embd": 512,
+  "params": 27448320,
+  "training_tokens": 589824000,
+  "training_steps": 36000,
+  "training_seconds": 10728.03225183487,
+  "final_val_loss": 1.43024,
+  "has_attention": true,
+  "files": {
+    "fp32": {
+      "parts": [
+        "model.onnx.part0",
+        "model.onnx.part1",
+        "model.onnx.part2"
+      ],
+      "bytes": 109954689
+    },
+    "int8": {
+      "file": "model.int8.onnx",
+      "bytes": 27851062
+    }
+  },
+  "parity": {
+    "fp32_max_logit_diff": 2.8133392333984375e-05,
+    "fp32_max_attention_diff": 8.881092071533203e-06,
+    "inputs": 20,
+    "int8_top1_agreement": 1.0,
+    "int8_max_logit_diff": 1.25433349609375
+  }
+}
