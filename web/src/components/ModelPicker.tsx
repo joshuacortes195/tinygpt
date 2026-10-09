@@ -69,7 +69,7 @@ export function ModelPicker({ label = 'Model', models, selectedId, onSelect, sta
 
       {/* what went wrong and a way to try again */}
       {state.status === 'error' && (
-        <div role="alert" className="grid gap-2 rounded-[3px] border border-danger/40 p-3 text-sm">
+        <div role="alert" className="grid gap-2 rounded-md border border-danger/40 p-3 text-sm">
           <p className="flex items-start gap-2 font-medium text-danger">
             <WarningIcon size={18} className="mt-0.5 shrink-0" />
             This model could not start in your browser.

@@ -9,9 +9,9 @@ export function ArchitectureDiagram({ config }: { config: ModelConfig }) {
     <div>
       {/* on small screens the chart keeps its width and scrolls sideways inside this box */}
       <div className="overflow-x-auto pb-2" tabIndex={0} role="group" aria-label="Model architecture, scrolls sideways">
-        <div className="min-w-[66rem]">
+        <div className="min-w-[60rem]">
           <ol className="flex items-stretch" aria-label="Model architecture, from input to output">
-            <Step n="01" title="Your text" detail={'"It was a quiet morning"'} />
+            <Step n="01" title="Your text" detail={'"Banana Bread"'} />
             <Arrow />
             <Step n="02" title="Tokenizer" detail={`Text is cut into ids from a vocab of ${vocab}`} />
             <Arrow />
@@ -23,7 +23,7 @@ export function ArchitectureDiagram({ config }: { config: ModelConfig }) {
             <Arrow />
 
             {/* the part that repeats */}
-            <li className="flex flex-[2.5] basis-0 flex-col rounded-[4px] border border-dashed border-border-strong p-2">
+            <li className="flex flex-[2.5] basis-0 flex-col rounded-lg border border-dashed border-border-strong p-2">
               <p className="num mb-2 flex items-baseline justify-between gap-3 px-1 text-xs">
                 <span className="text-text">Transformer block</span>
                 <span className="text-accent">x {config.n_layer}</span>
@@ -50,8 +50,8 @@ export function ArchitectureDiagram({ config }: { config: ModelConfig }) {
           </ol>
 
           {/* the line that loops back to the start */}
-          <div className="mx-[6%] flex h-9 items-end justify-center rounded-b-[4px] border border-t-0 border-dashed border-border-strong">
-            <p className="num flex translate-y-1/2 items-center gap-2 bg-bg px-3 text-xs text-muted">
+          <div className="mx-[6%] flex h-9 items-end justify-center rounded-b-lg border border-t-0 border-dashed border-border-strong">
+            <p className="num flex translate-y-1/2 items-center gap-2 bg-surface px-3 text-xs text-muted">
               <ArrowBendDownLeftIcon size={14} className="text-accent" />
               the new token is added to the text and it all runs again
             </p>
@@ -69,8 +69,8 @@ export function ArchitectureDiagram({ config }: { config: ModelConfig }) {
 function Step({ n, title, detail, accent }: { n: string; title: string; detail: string; accent?: boolean }) {
   return (
     <li
-      className={`flex-1 basis-0 rounded-[4px] border p-3 ${
-        accent ? 'border-accent bg-accent-soft' : 'border-border bg-surface'
+      className={`flex-1 basis-0 rounded-lg border p-3 ${
+        accent ? 'border-accent bg-accent-soft' : 'border-border bg-surface-2'
       }`}
     >
       <p className={`num text-[0.6875rem] ${accent ? 'text-text' : 'text-accent'}`}>{n}</p>

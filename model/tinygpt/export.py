@@ -173,7 +173,7 @@ def export_model_folder(model, ckpt, tokenizer_path, metrics_path, out_dir, name
 
 
 # adds the model to manifest.json, or updates it if it is already listed
-def add_to_manifest(manifest_path, model_id, name, description, make_default=False, examples=None):
+def add_to_manifest(manifest_path, model_id, name, description, make_default=False, examples=None, text_format=None):
     manifest_path = Path(manifest_path)
     manifest = {"default": model_id, "models": []}
     if manifest_path.exists():
@@ -182,6 +182,9 @@ def add_to_manifest(manifest_path, model_id, name, description, make_default=Fal
     # starting prompts the site offers for this model
     if examples:
         entry["examples"] = list(examples)
+    # tells the site to lay the writing out a certain way, like a recipe
+    if text_format:
+        entry["format"] = text_format
     manifest["models"] = [m for m in manifest["models"] if m["id"] != model_id] + [entry]
     if make_default:
         manifest["default"] = model_id

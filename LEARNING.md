@@ -319,3 +319,24 @@ The question: how does my from-scratch model compare to taking someone else's pr
 - *Why start `B` at zero?* So the model's output is unchanged at the first step and training starts from the pretrained behaviour, not from noise.
 - *How do you compare models with different tokenizers?* Normalize by something both share, like bytes or characters of text.
 - *When would you train from scratch instead of fine-tuning?* When the task is narrow, you have plenty of data for it, and you need the model small. Otherwise fine-tuning gets most of the way for far less compute.
+
+## Switching the site to recipes
+
+After the story models worked I wanted the site to write something more useful to look at, so I trained the same code on recipes. Nothing in the model changed. Only the data did, which is the nice part of a manifest-driven site and a config-driven trainer.
+
+**The data.** RecipeNLG, where every recipe has the same shape: a title, a blank line, `Ingredients:` with one dashed line each, then `Directions:` with one dashed line per step. I write each recipe out followed by the end-of-text token, hold out every 100th one for validation, and train a fresh 4,096 token tokenizer on it. The tokenizer learned very different merges from the story one: things like ` tsp.`, ` c.` and ` 350` become single tokens.
+
+**Results.**
+
+| Model | Parameters | Steps | Val loss | Training time |
+| --- | --- | --- | --- | --- |
+| Recipes small | 10.5M | 25,000 | 1.537 | 48 min |
+| Recipes | 27.4M | 36,000 | 1.430 | 2 h 59 min |
+
+The losses are higher than the story models got (1.342 and 1.208), but the two numbers can't be compared directly: different text and a different tokenizer. Recipes are full of quantities and brand names that are hard to guess, while children's stories reuse a small set of words.
+
+**What it is good and bad at.** The structure is close to perfect: it writes a title, a sensible ingredient list, then steps, and then stops on its own with the end-of-text token. What it does not have is a real idea of cooking. Ingredients listed at the top don't always get used, and steps sometimes mention something that was never listed. That is what you would expect from a model this size that has only learned which words tend to follow which.
+
+**Showing it like a cookbook.** Because the format is so regular, the site can lay the text out properly instead of printing one block. A model's manifest entry can say `"format": "recipe"`, and then the text view turns the first line into a title, the `Ingredients:` lines into a bulleted list and the `Directions:` lines into numbered steps. It works while the text is still streaming in, since it just re-reads the lines each time a token arrives.
+
+**A detour I dropped.** I also prepared a general-audience story dataset with an 8,192 token vocabulary, then decided the site should be about one thing. The dataset option is still in `prepare_data.py` (`--dataset general`) with its two configs, but no model was trained on it.

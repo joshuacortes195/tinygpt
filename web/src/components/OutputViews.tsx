@@ -24,12 +24,108 @@ export function TextView({ model, tokens, running }: ViewProps) {
     () => model.tokenizer.decode(tokens.filter((t) => !t.fromPrompt).map((t) => t.id)),
     [model, tokens],
   )
+  // recipe models get the cookbook layout instead of one paragraph
+  if (model.entry.format === 'recipe' || /^Ingredients:/m.test(promptText + outputText)) {
+    return <RecipeText text={promptText + outputText} promptLength={promptText.length} running={running} />
+  }
   return (
     <p className="max-w-[68ch] whitespace-pre-wrap text-[1.0625rem] leading-[1.7] break-words">
       <span className="text-muted">{promptText}</span>
       <span>{outputText}</span>
       {running && <span className="caret" aria-hidden="true" />}
     </p>
+  )
+}
+
+type RecipeLine = { text: string; start: number }
+type RecipePart = { kind: 'title' | 'heading' | 'text'; line: RecipeLine } | { kind: 'ingredients' | 'steps'; lines: RecipeLine[] }
+
+// sorts the lines of a recipe into a title, section headings, an ingredient list and numbered steps
+function recipeParts(text: string): RecipePart[] {
+  const parts: RecipePart[] = []
+  let section: 'ingredients' | 'steps' | null = null
+  let start = 0
+  for (const raw of text.split('\n')) {
+    const line = { text: raw, start }
+    start += raw.length + 1
+    if (!raw.trim()) continue
+    const last = parts[parts.length - 1]
+    if (/^(Ingredients|Directions):/.test(raw)) {
+      section = raw.startsWith('Ingredients') ? 'ingredients' : 'steps'
+      parts.push({ kind: 'heading', line: { text: raw.replace(/:\s*$/, ''), start: line.start } })
+    } else if (raw.startsWith('-') && section) {
+      // drop the dash, the list draws its own bullet or number
+      const cut = raw.length - raw.replace(/^-\s*/, '').length
+      const item = { text: raw.slice(cut), start: line.start + cut }
+      if (last && last.kind === section) last.lines.push(item)
+      else parts.push({ kind: section, lines: [item] })
+    } else if (parts.length === 0) {
+      parts.push({ kind: 'title', line })
+    } else {
+      parts.push({ kind: 'text', line })
+    }
+  }
+  return parts
+}
+
+// the writing laid out like a page in a cookbook
+function RecipeText({ text, promptLength, running }: { text: string; promptLength: number; running: boolean }) {
+  const parts = useMemo(() => recipeParts(text), [text])
+  const caret = running ? <span className="caret" aria-hidden="true" /> : null
+  // the part of a line that came from the prompt stays gray
+  const show = (line: RecipeLine) => {
+    const cut = Math.max(0, Math.min(line.text.length, promptLength - line.start))
+    return (
+      <>
+        <span className="text-muted">{line.text.slice(0, cut)}</span>
+        {line.text.slice(cut)}
+      </>
+    )
+  }
+  return (
+    <div className="max-w-[60ch] text-[1.0625rem] leading-[1.6] break-words">
+      {parts.map((part, i) => {
+        const end = i === parts.length - 1 ? caret : null
+        if (part.kind === 'title') {
+          return (
+            <h3 key={i} className="font-[family-name:var(--font-display)] text-[1.75rem] leading-tight font-medium">
+              {show(part.line)}
+              {end}
+            </h3>
+          )
+        }
+        if (part.kind === 'heading') {
+          return (
+            <h4 key={i} className="eyebrow mt-6 mb-2 border-b border-border pb-1.5">
+              {show(part.line)}
+              {end}
+            </h4>
+          )
+        }
+        if (part.kind === 'text') {
+          return (
+            <p key={i} className="mt-2">
+              {show(part.line)}
+              {end}
+            </p>
+          )
+        }
+        if (!('lines' in part)) return null
+        // ingredients are a dotted list, directions are numbered steps
+        const List = part.kind === 'steps' ? 'ol' : 'ul'
+        return (
+          <List key={i} className={`grid gap-1.5 pl-5 marker:text-accent ${part.kind === 'steps' ? 'list-decimal' : 'list-disc'}`}>
+            {part.lines.map((line, j) => (
+              <li key={j} className="pl-1">
+                {show(line)}
+                {j === part.lines.length - 1 && end}
+              </li>
+            ))}
+          </List>
+        )
+      })}
+      {parts.length === 0 && caret}
+    </div>
   )
 }
 
@@ -91,7 +187,7 @@ export function ProbabilityView({ model, tokens }: ViewProps) {
                 onMouseEnter={() => setSelected(i)}
                 aria-pressed={i === active}
                 aria-label={`${visibleToken(model.tokenizer.tokenLabel(t.id))}, ${formatPercent(t.prob ?? 0)}`}
-                className={`cursor-pointer rounded-[3px] py-0.5 whitespace-pre-wrap ${
+                className={`cursor-pointer rounded-md py-0.5 whitespace-pre-wrap ${
                   i === active ? 'outline-2 outline-offset-1 outline-accent' : ''
                 }`}
                 style={{
@@ -216,7 +312,7 @@ export function AttentionView({ model, tokens, running }: ViewProps) {
                 type="button"
                 onClick={() => setFocus(i)}
                 aria-pressed={i === row}
-                className={`cursor-pointer rounded-[3px] py-0.5 whitespace-pre-wrap ${
+                className={`cursor-pointer rounded-md py-0.5 whitespace-pre-wrap ${
                   i === row ? 'outline-2 outline-offset-1 outline-text' : ''
                 } ${i > row ? 'text-muted' : ''}`}
                 style={{ backgroundColor: `oklch(var(--heat) / ${(weight * 0.85).toFixed(3)})` }}
@@ -249,7 +345,7 @@ function Stepper({ label, count, value, onChange }: { label: string; count: numb
             type="button"
             aria-pressed={i === value}
             onClick={() => onChange(i)}
-            className={`num h-11 min-w-11 cursor-pointer rounded-[3px] border px-2 text-sm transition-colors sm:h-9 sm:min-w-9 ${
+            className={`num h-11 min-w-11 cursor-pointer rounded-md border px-2 text-sm transition-colors sm:h-9 sm:min-w-9 ${
               i === value
                 ? 'border-transparent bg-accent font-semibold text-accent-fg'
                 : 'border-border bg-transparent text-muted hover:border-border-strong hover:text-text'
@@ -324,7 +420,7 @@ function AttentionMatrix({
           ref={canvasRef}
           role="img"
           aria-label="Attention grid. Each row is a token and each column is an earlier token it looked at."
-          className="aspect-square w-full max-w-md cursor-crosshair rounded-[3px] border border-border [image-rendering:pixelated]"
+          className="aspect-square w-full max-w-md cursor-crosshair rounded-md border border-border [image-rendering:pixelated]"
           // clicking a row picks that token above
           onClick={(e) => {
             const box = e.currentTarget.getBoundingClientRect()

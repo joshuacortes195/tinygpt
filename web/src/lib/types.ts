@@ -7,6 +7,8 @@ export interface ManifestEntry {
   path: string
   // starting prompts that suit what this model was trained on
   examples?: string[]
+  // how the text view lays the writing out, plain paragraphs when missing
+  format?: 'recipe'
 }
 
 // an optional bigger model that runs through transformers.js and only loads when asked

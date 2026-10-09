@@ -22,6 +22,7 @@ def main():
     p.add_argument("--no-manifest", action="store_true", help="don't touch manifest.json")
     p.add_argument("--default", action="store_true", help="make this the model the site opens with")
     p.add_argument("--examples", nargs="*", default=None, help="starting prompts shown on the site, type \\n for a new line")
+    p.add_argument("--format", choices=["recipe"], default=None, help="how the site lays out what the model writes")
     args = p.parse_args()
 
     ckpt_path = Path(args.checkpoint)
@@ -47,7 +48,7 @@ def main():
     if not args.no_manifest:
         # a typed backslash n in an example becomes a real new line
         examples = [e.replace("\\n", "\n") for e in args.examples] if args.examples else None
-        add_to_manifest(WEB_MODELS / "manifest.json", args.id, name, args.description, args.default, examples)
+        add_to_manifest(WEB_MODELS / "manifest.json", args.id, name, args.description, args.default, examples, args.format)
         print(f"added {args.id} to manifest.json")
 
 

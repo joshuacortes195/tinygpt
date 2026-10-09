@@ -12,7 +12,7 @@ const LINKS: { page: Page; label: string; href: string }[] = [
 
 // reads the theme the page started with
 function currentTheme(): 'light' | 'dark' {
-  return document.documentElement.dataset.theme === 'light' ? 'light' : 'dark'
+  return document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light'
 }
 
 export function Header({ page }: { page: Page }) {
@@ -35,11 +35,11 @@ export function Header({ page }: { page: Page }) {
 
   return (
     <header className="sticky top-0 z-20 border-b border-border bg-bg/90 backdrop-blur">
-      <div className="frame flex h-14 items-center gap-2 px-4 sm:gap-6 sm:px-7">
-        {/* site name with a little cursor block next to it */}
-        <a href="#/" className="num flex shrink-0 items-center gap-2 text-[0.9375rem] font-semibold tracking-tight">
-          <span className="h-4 w-2 bg-accent" aria-hidden="true" />
-          tinygpt
+      <div className="frame flex h-14 items-center gap-2 !pb-0 sm:gap-6">
+        {/* site name with a little tomato dot next to it */}
+        <a href="#/" className="flex shrink-0 items-center gap-2 font-[family-name:var(--font-display)] text-xl font-medium tracking-tight">
+          <span className="h-2.5 w-2.5 rounded-full bg-accent" aria-hidden="true" />
+          TinyGPT
         </a>
 
         {/* page links, they scroll sideways on very small phones */}
@@ -49,8 +49,8 @@ export function Header({ page }: { page: Page }) {
               key={link.page}
               href={link.href}
               aria-current={page === link.page ? 'page' : undefined}
-              className={`num flex h-14 shrink-0 items-center border-b-2 px-2.5 text-[0.8125rem] transition-colors sm:px-3 ${
-                page === link.page ? 'border-accent text-accent' : 'border-transparent text-muted hover:text-text'
+              className={`flex h-14 shrink-0 items-center border-b-2 px-2.5 text-[0.9375rem] font-medium transition-colors sm:px-3 ${
+                page === link.page ? 'border-accent text-text' : 'border-transparent text-muted hover:text-text'
               }`}
             >
               {link.label}

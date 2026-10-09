@@ -8,7 +8,7 @@ import { useModel } from '../hooks/useModel'
 import { DEFAULT_SETTINGS, type ManifestEntry, type SamplingSettings } from '../lib/types'
 
 // starting prompts for models that don't bring their own
-const EXAMPLES = ['Once upon a time', 'Lily found a little red ball', 'The dragon was sad because', 'One day, a tiny robot']
+const EXAMPLES = ['Chocolate Chip Cookies', 'Chicken Noodle Soup', 'Banana Bread', 'Garlic Butter Pasta']
 
 const VIEWS = [
   { id: 'text', label: 'Text' },
@@ -61,21 +61,18 @@ export function TryIt({ models, selectedId, onSelect }: Props) {
   return (
     <div className="frame">
       {/* intro */}
-      <div className="cell border-b border-border sm:py-12">
-        <p className="eyebrow flex items-center gap-2">
-          <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden="true" />
-          Runs on your device
-        </p>
-        <h1 className="mt-4 max-w-[20ch] text-[2rem] leading-[1.05] font-semibold tracking-tight sm:text-5xl">
-          A GPT I built from scratch, running in your browser.
+      <div className="cell !px-1 sm:py-12">
+        <p className="eyebrow">Runs on your device</p>
+        <h1 className="mt-3 max-w-[20ch] text-[2.25rem] leading-[1.05] sm:text-[3.5rem]">
+          A GPT I built from scratch, and taught to write recipes.
         </h1>
         <p className="mt-4 max-w-[58ch] leading-relaxed text-muted">
           My own tokenizer, transformer and training loop. Nothing is sent to a server: the model downloads once
-          and runs on your device. Give it a start and watch it write, then look inside.
+          and runs on your device. Give it the name of a dish and watch it write, then look inside.
         </p>
       </div>
 
-      <div className="grid lg:grid-cols-[minmax(0,1fr)_20rem]">
+      <div className="panel grid lg:grid-cols-[minmax(0,1fr)_20rem]">
         <div className="min-w-0 lg:border-r lg:border-border">
           {/* prompt box and the button that starts the model */}
           <form
@@ -143,8 +140,8 @@ export function TryIt({ models, selectedId, onSelect }: Props) {
                   aria-selected={view === v.id}
                   aria-controls="output-panel"
                   onClick={() => setView(v.id)}
-                  className={`num h-12 shrink-0 cursor-pointer border-b-2 px-3 text-[0.8125rem] transition-colors ${
-                    view === v.id ? 'border-accent text-accent' : 'border-transparent text-muted hover:text-text'
+                  className={`h-12 shrink-0 cursor-pointer border-b-2 px-3 text-[0.9375rem] font-medium transition-colors ${
+                    view === v.id ? 'border-accent text-text' : 'border-transparent text-muted hover:text-text'
                   }`}
                 >
                   {v.label}
@@ -195,7 +192,7 @@ export function TryIt({ models, selectedId, onSelect }: Props) {
         </div>
 
         {/* model choice and sampling controls */}
-        <aside className="cell grid content-start gap-8 border-t border-border lg:sticky lg:top-14 lg:self-start lg:border-t-0">
+        <aside className="cell grid content-start gap-8 border-t border-border bg-surface-2/50 lg:border-t-0">
           <ModelPicker
             models={models}
             selectedId={selectedId}

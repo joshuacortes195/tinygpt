@@ -29,3 +29,5 @@ web/public/models/smollm2-stories/
 .DS_Store
 Thumbs.db
 *.log
+web/public/models/recipes-small/
+model/exports/

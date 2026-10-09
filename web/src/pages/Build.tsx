@@ -72,9 +72,9 @@ export function Build({ models, defaultId }: Props) {
 
   return (
     <div className="frame">
-      <div className="cell border-b border-border sm:py-12">
+      <div className="cell !px-1 sm:py-12">
         <p className="eyebrow">How I built it</p>
-        <h1 className="mt-4 max-w-[22ch] text-[2rem] leading-[1.05] font-semibold tracking-tight sm:text-5xl">
+        <h1 className="mt-3 max-w-[22ch] text-[2.25rem] leading-[1.05] sm:text-[3.5rem]">
           Every part written by hand.
         </h1>
         <p className="mt-4 max-w-[60ch] leading-relaxed text-muted">
@@ -84,7 +84,7 @@ export function Build({ models, defaultId }: Props) {
       </div>
 
       {/* pick which model the numbers below describe */}
-      <section className="grid border-b border-border lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
+      <section className="panel grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
         <div className="cell grid content-start gap-6">
           <div className="grid max-w-xs gap-2">
             <label htmlFor={selectId} className="label">
@@ -108,7 +108,7 @@ export function Build({ models, defaultId }: Props) {
 
           {/* model facts read from config.json */}
           {config && (
-            <dl className="grid grid-cols-2 border-t border-l border-border">
+            <dl className="grid grid-cols-2 overflow-hidden rounded-lg border-t border-l border-border">
               <Stat label="Parameters" value={formatCount(config.params)} strong />
               <Stat label="Layers" value={String(config.n_layer)} />
               <Stat label="Attention heads" value={`${config.n_head} per layer`} />
@@ -146,7 +146,7 @@ export function Build({ models, defaultId }: Props) {
 
       {/* the architecture, left to right */}
       {config && (
-        <section className="cell border-b border-border">
+        <section className="cell panel mt-5">
           <h2 className="eyebrow">What happens to your text</h2>
           <p className="mt-4 mb-8 max-w-[64ch] leading-relaxed text-muted">
             The model only ever does one thing: given some tokens, guess the next one. To write, it guesses, adds
@@ -158,7 +158,7 @@ export function Build({ models, defaultId }: Props) {
       )}
 
       {/* write-ups */}
-      <section>
+      <section className="panel mt-5">
         <h2 className="eyebrow cell !pb-0">Notes from building it</h2>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3">
           {NOTES.map((note, i) => (
@@ -168,7 +168,7 @@ export function Build({ models, defaultId }: Props) {
               <p className="mt-2 max-w-[46ch] flex-1 leading-relaxed text-muted">{note.body}</p>
               <a
                 href={learningLink(note.anchor)}
-                className="num mt-2 inline-flex min-h-11 items-center gap-1 self-start text-[0.8125rem] text-accent hover:underline"
+                className="mt-2 inline-flex min-h-11 items-center gap-1 self-start text-sm font-medium text-accent hover:underline"
               >
                 Read the notes
                 <ArrowUpRightIcon size={14} />
@@ -183,7 +183,7 @@ export function Build({ models, defaultId }: Props) {
             </p>
             <a
               href={REPO_URL}
-              className="num mt-2 inline-flex min-h-11 items-center gap-1 self-start text-[0.8125rem] text-accent hover:underline"
+              className="mt-2 inline-flex min-h-11 items-center gap-1 self-start text-sm font-medium text-accent hover:underline"
             >
               View the source
               <ArrowUpRightIcon size={14} />

@@ -65,7 +65,7 @@ export default function App() {
     <div className="flex min-h-dvh flex-col">
       <a
         href="#main"
-        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-30 focus:rounded-[3px] focus:bg-surface focus:px-3 focus:py-2"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-30 focus:rounded-md focus:bg-surface focus:px-3 focus:py-2"
       >
         Skip to content
       </a>

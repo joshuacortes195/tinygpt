@@ -1,33 +1,35 @@
 {
-  "default": "base",
+  "default": "recipes",
+  "compare": [
+    "recipes-small",
+    "recipes"
+  ],
   "models": [
     {
-      "id": "v0-smoke",
-      "name": "v0 smoke (0.7M)",
-      "description": "Tiny test model trained for a couple of minutes. Proves the pipeline works.",
-      "path": "v0-smoke"
+      "id": "recipes",
+      "name": "Recipes (27M)",
+      "description": "The full model. About 3 hours of training on one GPU.",
+      "path": "recipes",
+      "examples": [
+        "Chocolate Chip Cookies\n\nIngredients:\n",
+        "Chicken Noodle Soup\n\nIngredients:\n",
+        "Banana Bread\n\nIngredients:\n",
+        "Garlic Butter Pasta\n\nIngredients:\n"
+      ],
+      "format": "recipe"
     },
     {
-      "id": "small",
-      "name": "Small (10.5M)",
-      "description": "First real run. 25,000 steps, about 50 minutes on one GPU.",
-      "path": "small"
-    },
-    {
-      "id": "base",
-      "name": "Base (27M)",
-      "description": "The full model. About 3 hours on one GPU.",
-      "path": "base"
-    }
-  ],
-  "extras": [
-    {
-      "id": "smollm2-stories",
-      "name": "SmolLM2-135M + LoRA",
-      "description": "A pretrained 135M model, fine-tuned on the same stories with LoRA. Not built from scratch, here for comparison.",
-      "path": "smollm2-stories",
-      "dtype": "q8",
-      "bytes": 164919257
+      "id": "recipes-small",
+      "name": "Recipes small (10M)",
+      "description": "A smaller model trained on the same recipes. Faster and a smaller download, but less accurate.",
+      "path": "recipes-small",
+      "examples": [
+        "Chocolate Chip Cookies\n\nIngredients:\n",
+        "Chicken Noodle Soup\n\nIngredients:\n",
+        "Banana Bread\n\nIngredients:\n",
+        "Garlic Butter Pasta\n\nIngredients:\n"
+      ],
+      "format": "recipe"
     }
   ]
 }

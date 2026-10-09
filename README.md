@@ -1,6 +1,6 @@
 # TinyGPT
 
-A GPT-style language model I built from scratch: my own tokenizer, my own transformer, my own training loop. It runs entirely in your browser, so there is no server and nothing to pay for.
+A GPT-style language model I built from scratch: my own tokenizer, my own transformer, my own training loop. I trained it on recipes, so you give it the name of a dish and it writes the ingredients and the steps. It runs entirely in your browser, so there is no server and nothing to pay for.
 
 **Try it: https://joshuacortes195.github.io/tinygpt/**
 
@@ -8,7 +8,7 @@ A GPT-style language model I built from scratch: my own tokenizer, my own transf
 
 ## What it does
 
-- **Try it.** Type a prompt and watch the model write one token at a time. Sliders for temperature, top-k, top-p and length, plus a seed so runs are repeatable.
+- **Try it.** Type the name of a dish and watch the model write the recipe one token at a time, laid out like a cookbook page. Sliders for temperature, top-k, top-p and length, plus a seed so runs are repeatable.
 - **Look inside.** See how your text was split into tokens, what the model's top 10 guesses were at every step, and which earlier words each attention head was looking at.
 - **Compare.** Run the same prompt through two models side by side.
 - **How I built it.** Architecture, model stats and the real loss curves from training.
@@ -31,18 +31,17 @@ text ──> BPE tokenizer ──> token + position embeddings
 - **Tokenizer:** byte-level BPE with a 4,096 token vocab, written in Python and ported to TypeScript. Both are tested against the same golden cases so they always produce identical ids.
 - **Model:** decoder-only transformer with hand-written multi-head causal self-attention, pre-LayerNorm blocks, GELU MLPs and tied input/output embeddings. No `nn.Transformer`, no `nn.MultiheadAttention`, no Hugging Face.
 - **Training:** AdamW, cosine schedule with warmup, gradient clipping, mixed precision on CUDA, and checkpoints that resume bit-for-bit.
-- **Data:** [TinyStories](https://huggingface.co/datasets/roneneldan/TinyStories), about 559M tokens of short children's stories.
+- **Data:** recipes from [RecipeNLG](https://recipenlg.cs.put.poznan.pl/), about 329M tokens, each one a title, an ingredient list and directions. The dataset is for non-commercial research and education use, which is what this project is.
 - **Browser:** the model is exported to ONNX and run with ONNX Runtime Web in a Web Worker. WebGPU when the browser has it, WebAssembly otherwise.
 
 | Model | Parameters | Layers / heads / width | Context | Val loss | Training time |
 | --- | --- | --- | --- | --- | --- |
-| v0 smoke | 0.7M | 3 / 3 / 96 | 64 | 2.377 | 74 s |
-| small | 10.5M | 5 / 6 / 384 | 256 | 1.342 | 53 min |
-| base | 27.4M | 8 / 8 / 512 | 256 | 1.208 | 2 h 47 min |
+| Recipes small | 10.5M | 5 / 6 / 384 | 256 | 1.537 | 48 min |
+| Recipes | 27.4M | 8 / 8 / 512 | 256 | 1.430 | 2 h 59 min |
 
-All three were trained on one RTX 3060. In Chrome, base writes about 76 tokens/sec on WebGPU and 13 on the WebAssembly fallback.
+Both were trained on one RTX 3060. In Chrome, the 27M model writes about 75 tokens/sec on WebGPU.
 
-**Compared against a pretrained model.** As a side experiment I fine-tuned SmolLM2-135M on the same stories with my own LoRA code (0.34% of its weights, 24 minutes). It is an optional download on the Compare page. Measured per byte of text, my 27M model still predicts these stories better (0.303 against 0.405).
+**Earlier versions.** I first trained the same code on TinyStories (short children's stories) and, as a side experiment, fine-tuned SmolLM2-135M on those stories with my own LoRA code. Those models are no longer on the site, but the code, configs and results are still here and written up in [LEARNING.md](LEARNING.md).
 
 More detail on every part, with the reasoning behind it, is in [LEARNING.md](LEARNING.md).
 
@@ -51,7 +50,7 @@ More detail on every part, with the reasoning behind it, is in [LEARNING.md](LEA
 ```
 model/            Python: tokenizer, GPT, training, ONNX export
   tinygpt/        the package
-  configs/        smoke.yaml, small.yaml, base.yaml
+  configs/        recipes.yaml, recipes-small.yaml, plus the older story configs
   scripts/        prepare_data, train, sample, export_onnx, finetune_lora
   tests/
 web/              React + TypeScript + Vite + Tailwind
@@ -91,7 +90,7 @@ The site never hardcodes a model. It reads `web/public/models/manifest.json`, so
 
 ```bash
 cd model
-python scripts/export_onnx.py runs/base/ckpt.pt --id base --name "Base (27M)" --default
+python scripts/export_onnx.py runs/recipes/ckpt.pt --id recipes --name "Recipes (27M)" --default --format recipe
 cd ../web
 npm run deploy
 ```

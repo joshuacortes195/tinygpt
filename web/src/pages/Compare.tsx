@@ -38,7 +38,7 @@ export function Compare({ models, defaultId, extras, pair }: Props) {
   const right = useSide(models, rightId)
   // open with a prompt that suits the models being compared
   const [prompt, setPrompt] = useState(
-    () => models.find((m) => m.id === rightId)?.examples?.[0] ?? 'Once upon a time, there was a little dog named',
+    () => models.find((m) => m.id === rightId)?.examples?.[0] ?? 'Chocolate Chip Cookies',
   )
   const [settings, setSettings] = useState<SamplingSettings>({ ...DEFAULT_SETTINGS, maxTokens: 80 })
 
@@ -59,15 +59,17 @@ export function Compare({ models, defaultId, extras, pair }: Props) {
 
   return (
     <div className="frame">
-      <div className="cell border-b border-border sm:py-12">
+      <div className="cell !px-1 sm:py-12">
         <p className="eyebrow">Compare</p>
-        <h1 className="mt-4 text-[2rem] leading-[1.05] font-semibold tracking-tight sm:text-5xl">Same prompt, two models.</h1>
+        <h1 className="mt-3 text-[2.25rem] leading-[1.05] sm:text-[3.5rem]">Same prompt, two models.</h1>
         <p className="mt-4 max-w-[58ch] leading-relaxed text-muted">
           Both models get the same prompt, settings and seed. The only thing that changes is the model, so any
           difference in the writing comes from size and training.
         </p>
       </div>
 
+      {/* everything below the title sits in one white card */}
+      <div className="panel">
       {/* shared prompt and run button */}
       <form
         className="cell grid gap-3 border-b border-border"
@@ -82,8 +84,8 @@ export function Compare({ models, defaultId, extras, pair }: Props) {
         </label>
         <textarea
           id={promptId}
-          className="field min-h-20 resize-y leading-relaxed"
-          rows={2}
+          className="field min-h-24 resize-y leading-relaxed"
+          rows={3}
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
         />
@@ -112,6 +114,7 @@ export function Compare({ models, defaultId, extras, pair }: Props) {
           <SettingsPanel settings={settings} onChange={setSettings} disabled={running} />
         </div>
       </details>
+      </div>
     </div>
   )
 }

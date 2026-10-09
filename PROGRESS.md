@@ -50,14 +50,16 @@ Follow TRAINING.md. A run is finished when the last line of `model/runs/<name>/m
 - **CI workflow is not on GitHub yet.** The saved GitHub login doesn't have the `workflow` permission, so pushing `.github/workflows/ci.yml` is rejected. The file is committed on the local `ci` branch. To turn CI on: run `gh auth refresh -s workflow`, then `git checkout main && git merge ci && git push`.
 - Safari can't be tested from this Windows machine. Chrome and Edge are covered; Safari needs a check on a Mac or iPhone.
 
-## Recipes model (in progress)
+## Recipes models (done)
 
-A second from-scratch model, same size as base, trained on recipes instead of stories so the site has something other than children's stories.
+The site now only offers the two recipes models. The children's story models and the SmolLM2 panel are off the site; their exported folders sit in `model/exports/` (not in git) and the code and write-ups are still in the repo.
 
-- Data: `python scripts/prepare_data.py --dataset recipes --max-train-mb 1200` (2.1M recipes, 329M train tokens, its own tokenizer in `model/data-recipes/`).
-- Training: `python scripts/train.py configs/recipes.yaml`, started 2026-10-08 around 21:45, 36,000 steps, about 2 h 45 min. Log in `model/runs/recipes.log`.
-- When it finishes: export with `scripts/export_onnx.py runs/recipes/ckpt.pt --id recipes --name "Recipes (27M)" --examples ...`, deploy, add the results to README and LEARNING.md.
+- Data: `python scripts/prepare_data.py --dataset recipes --max-train-mb 1200` (329M train tokens, its own tokenizer in `model/data-recipes/`).
+- Recipes (27M): `configs/recipes.yaml`, 36,000 steps, 2 h 59 min, val loss 1.430.
+- Recipes small (10M): `configs/recipes-small.yaml`, 25,000 steps, 48 min, val loss 1.537.
+- Exported with `--format recipe`, which makes the Try it page lay the writing out like a cookbook page: title, ingredient list, numbered directions.
+- `manifest.json`: default `recipes`, compare pair `recipes-small` and `recipes`.
 
 ## Redesign
 
-The site was restyled on 2026-10-08: dark by default with a green accent, the Playground page is now called Try it, and the flow chart on the build page runs left to right.
+The site was restyled on 2026-10-09: light by default, cream page, white cards, tomato accent, serif titles. Dark mode is a warm charcoal. The Playground page is called Try it, and the flow chart on the build page runs left to right.

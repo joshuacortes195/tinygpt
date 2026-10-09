@@ -8,7 +8,7 @@
       name="description"
       content="A GPT-style language model built from scratch, with its own tokenizer, transformer and training loop. Try it in your browser and look inside while it writes."
     />
-    <meta name="theme-color" content="#090d0b" />
+    <meta name="theme-color" content="#faf6ee" />
     <meta property="og:title" content="TinyGPT" />
     <meta
       property="og:description"
@@ -22,8 +22,8 @@
         try {
           saved = localStorage.getItem('theme')
         } catch (e) {}
-        // dark is the look the site is built around, light only if it was picked before
-        document.documentElement.dataset.theme = saved === 'light' ? 'light' : 'dark'
+        // light is the look the site is built around, dark only if it was picked before
+        document.documentElement.dataset.theme = saved === 'dark' ? 'dark' : 'light'
       })()
     </script>
   </head>

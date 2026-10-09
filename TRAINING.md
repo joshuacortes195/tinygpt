@@ -134,3 +134,19 @@ To remove a model, delete its folder and its entry in `manifest.json`.
 - [ ] both exported with fp32 parity under 0.001
 - [ ] `manifest.json` lists them and `base` is the default
 - [ ] `npm run deploy`, then load the live site and generate a story
+
+## The recipes models (what the site runs now)
+
+The steps above use the story data as the example. The site itself runs two models trained on recipes, and the commands are the same with a different dataset and config:
+
+```powershell
+cd model
+pip install -e ".[recipes]"
+python scripts\prepare_data.py --dataset recipes --max-train-mb 1200
+python scripts\train.py configs\recipes.yaml
+python scripts\train.py configs\recipes-small.yaml
+python scripts\export_onnx.py runs\recipes\ckpt.pt --id recipes --name "Recipes (27M)" --default --format recipe --examples "Banana Bread\n\nIngredients:\n"
+python scripts\export_onnx.py runs\recipes-small\ckpt.pt --id recipes-small --name "Recipes small (10M)" --format recipe --examples "Banana Bread\n\nIngredients:\n"
+```
+
+`--format recipe` tells the site to lay the writing out as a title, an ingredient list and numbered steps. `--examples` sets the starting prompts shown as buttons, where a typed `\n` becomes a new line. The recipe data lands in `model/data-recipes/` with its own tokenizer, so it never mixes with the story data.
