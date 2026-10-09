@@ -5,7 +5,8 @@ import { AttentionView, ProbabilityView, TextView, TokenView } from '../componen
 import { SettingsPanel } from '../components/SettingsPanel'
 import { useGeneration } from '../hooks/useGeneration'
 import { useModel } from '../hooks/useModel'
-import { DEFAULT_SETTINGS, type ManifestEntry, type SamplingSettings } from '../lib/types'
+import { preparePrompt, startSettings } from '../lib/recipePrompt'
+import type { ManifestEntry, SamplingSettings } from '../lib/types'
 
 // starting prompts for models that don't bring their own
 const EXAMPLES = ['Chocolate Chip Cookies', 'Chicken Noodle Soup', 'Banana Bread', 'Garlic Butter Pasta']
@@ -42,7 +43,7 @@ export function TryIt({ models, selectedId, onSelect }: Props) {
   const [prompt, setPrompt] = useState(() => examples[0])
   // true once the visitor has typed a prompt of their own
   const [typed, setTyped] = useState(false)
-  const [settings, setSettings] = useState<SamplingSettings>(DEFAULT_SETTINGS)
+  const [settings, setSettings] = useState<SamplingSettings>(() => startSettings(entry))
   const [view, setView] = useState<ViewId>('text')
   const [retry, setRetry] = useState(0)
 
@@ -51,6 +52,8 @@ export function TryIt({ models, selectedId, onSelect }: Props) {
   const { tokens, running, stats, error, run, stop } = useGeneration(model)
 
   const hasOutput = tokens.length > 0
+  // recipe models take the name of a dish instead of free text
+  const isRecipe = entry?.format === 'recipe'
 
   // switching models swaps in that model's first example, unless you wrote your own prompt
   function pickModel(id: string) {
@@ -80,18 +83,24 @@ export function TryIt({ models, selectedId, onSelect }: Props) {
             onSubmit={(e) => {
               e.preventDefault()
               if (running) stop()
-              else void run(prompt, settings)
+              else void run(preparePrompt(prompt, entry), settings)
             }}
           >
-            <label htmlFor={promptId} className="label">
-              Prompt
-            </label>
+            <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+              <label htmlFor={promptId} className="label">
+                {isRecipe ? 'Name a dish' : 'Prompt'}
+              </label>
+              {/* sets expectations before anyone reads a recipe */}
+              <p className="text-[0.8125rem] leading-snug text-muted">
+                This LLM is still under development and training, so recipes may seem off or incorrect.
+              </p>
+            </div>
             <textarea
               id={promptId}
               className="field min-h-24 resize-y leading-relaxed"
               value={prompt}
               rows={3}
-              placeholder="Start it off, or leave this empty and let the model begin"
+              placeholder={isRecipe ? 'Pizza, ramen noodles, banana bread...' : 'Start it off, or leave this empty and let the model begin'}
               onChange={(e) => {
                 setPrompt(e.target.value)
                 setTyped(true)
@@ -100,7 +109,7 @@ export function TryIt({ models, selectedId, onSelect }: Props) {
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && (e.metaKey || e.ctrlKey) && model && !running) {
                   e.preventDefault()
-                  void run(prompt, settings)
+                  void run(preparePrompt(prompt, entry), settings)
                 }
               }}
             />

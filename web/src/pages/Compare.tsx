@@ -7,7 +7,8 @@ import { SettingsPanel } from '../components/SettingsPanel'
 import { useGeneration } from '../hooks/useGeneration'
 import { useModel } from '../hooks/useModel'
 import { formatCount } from '../lib/format'
-import { DEFAULT_SETTINGS, type ExtraEntry, type ManifestEntry, type SamplingSettings } from '../lib/types'
+import { preparePrompt, startSettings } from '../lib/recipePrompt'
+import type { ExtraEntry, ManifestEntry, SamplingSettings } from '../lib/types'
 
 interface Props {
   models: ManifestEntry[]
@@ -40,16 +41,21 @@ export function Compare({ models, defaultId, extras, pair }: Props) {
   const [prompt, setPrompt] = useState(
     () => models.find((m) => m.id === rightId)?.examples?.[0] ?? 'Chocolate Chip Cookies',
   )
-  const [settings, setSettings] = useState<SamplingSettings>({ ...DEFAULT_SETTINGS, maxTokens: 80 })
+  const [settings, setSettings] = useState<SamplingSettings>(() => ({
+    ...startSettings(models.find((m) => m.id === rightId)),
+    maxTokens: 120,
+  }))
 
   const running = left.generation.running || right.generation.running
   const ready = left.model !== null && right.model !== null
 
   // one after the other, so each model gets the whole machine and the speeds are fair
   async function runBoth() {
-    const first = await left.generation.run(prompt, settings)
+    // each side gets the prompt tidied up for its own model
+    const entryFor = (id: string) => models.find((m) => m.id === id)
+    const first = await left.generation.run(preparePrompt(prompt, entryFor(left.id)), settings)
     if (first?.stopped === 'abort') return
-    await right.generation.run(prompt, settings)
+    await right.generation.run(preparePrompt(prompt, entryFor(right.id)), settings)
   }
 
   function stopBoth() {
@@ -79,9 +85,15 @@ export function Compare({ models, defaultId, extras, pair }: Props) {
           else void runBoth()
         }}
       >
-        <label htmlFor={promptId} className="label">
-          Prompt
-        </label>
+        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+          <label htmlFor={promptId} className="label">
+            Prompt
+          </label>
+          {/* sets expectations before anyone reads a recipe */}
+          <p className="text-[0.8125rem] leading-snug text-muted">
+            This LLM is still under development and training, so recipes may seem off or incorrect.
+          </p>
+        </div>
         <textarea
           id={promptId}
           className="field min-h-24 resize-y leading-relaxed"

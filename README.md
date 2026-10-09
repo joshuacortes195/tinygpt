@@ -8,7 +8,7 @@ A GPT-style language model I built from scratch: my own tokenizer, my own transf
 
 ## What it does
 
-- **Try it.** Type the name of a dish and watch the model write the recipe one token at a time, laid out like a cookbook page. Sliders for temperature, top-k, top-p and length, plus a seed so runs are repeatable.
+- **Try it.** Type the name of a dish and watch the model write the recipe one token at a time, laid out like a cookbook page. Typos in the dish name are corrected before the model sees it. Sliders for temperature, top-k, top-p and length, plus a seed so runs are repeatable.
 - **Look inside.** See how your text was split into tokens, what the model's top 10 guesses were at every step, and which earlier words each attention head was looking at.
 - **Compare.** Run the same prompt through two models side by side.
 - **How I built it.** Architecture, model stats and the real loss curves from training.
