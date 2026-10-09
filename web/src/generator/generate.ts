@@ -23,7 +23,7 @@ export interface GenerateStats {
   stopped: 'max' | 'end' | 'abort'
 }
 
-// the prompt as tokens, an empty prompt starts from the end-of-story marker
+// the prompt as tokens, an empty prompt starts from the end-of-text marker
 export function promptTokens(tokenizer: BPETokenizer, prompt: string): number[] {
   const ids = tokenizer.encode(prompt, false)
   if (ids.length) return ids
@@ -55,7 +55,7 @@ export async function generate(options: GenerateOptions): Promise<GenerateStats>
     }
 
     const id = sampleToken(logits, settings, random)
-    // the model saying "the story is over"
+    // the model saying "this text is over"
     if (id === eot) {
       stopped = 'end'
       break

@@ -4,11 +4,11 @@ A GPT-style language model I built from scratch: my own tokenizer, my own transf
 
 **Try it: https://joshuacortes195.github.io/tinygpt/**
 
-![Demo of the playground](docs/demo.gif)
+![Demo of the site](docs/demo.gif)
 
 ## What it does
 
-- **Playground.** Type a prompt and watch the model write a story one token at a time. Sliders for temperature, top-k, top-p and length, plus a seed so runs are repeatable.
+- **Try it.** Type a prompt and watch the model write one token at a time. Sliders for temperature, top-k, top-p and length, plus a seed so runs are repeatable.
 - **Look inside.** See how your text was split into tokens, what the model's top 10 guesses were at every step, and which earlier words each attention head was looking at.
 - **Compare.** Run the same prompt through two models side by side.
 - **How I built it.** Architecture, model stats and the real loss curves from training.

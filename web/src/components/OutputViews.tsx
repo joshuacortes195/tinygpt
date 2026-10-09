@@ -112,7 +112,7 @@ export function ProbabilityView({ model, tokens }: ViewProps) {
       {/* the top 10 guesses for the picked step */}
       {token && (
         <div key={active} className="reveal" aria-live="polite">
-          <h3 className="text-sm font-medium">
+          <h3 className="label">
             Top guesses for token {active - firstGenerated + 1}
           </h3>
           <ol className="mt-3 grid gap-1.5">
@@ -125,7 +125,7 @@ export function ProbabilityView({ model, tokens }: ViewProps) {
                   </span>
                   {/* bar length is the probability */}
                   <span
-                    className={`h-2 origin-left rounded-full ${chosen ? 'bg-accent' : 'bg-border-strong'}`}
+                    className={`h-2 origin-left ${chosen ? 'bg-accent' : 'bg-border-strong'}`}
                     style={{ width: `${Math.max(1.5, candidate.prob * 100)}%` }}
                   />
                   <span className="num text-right text-xs text-muted">{formatPercent(candidate.prob)}</span>
@@ -249,10 +249,10 @@ function Stepper({ label, count, value, onChange }: { label: string; count: numb
             type="button"
             aria-pressed={i === value}
             onClick={() => onChange(i)}
-            className={`num h-11 min-w-11 cursor-pointer rounded-lg border px-2 text-sm transition-colors sm:h-9 sm:min-w-9 ${
+            className={`num h-11 min-w-11 cursor-pointer rounded-[3px] border px-2 text-sm transition-colors sm:h-9 sm:min-w-9 ${
               i === value
-                ? 'border-transparent bg-accent text-accent-fg'
-                : 'border-border-strong bg-surface text-text hover:border-text'
+                ? 'border-transparent bg-accent font-semibold text-accent-fg'
+                : 'border-border bg-transparent text-muted hover:border-border-strong hover:text-text'
             }`}
           >
             {i + 1}
@@ -318,13 +318,13 @@ function AttentionMatrix({
 
   return (
     <details className="group">
-      <summary className="cursor-pointer py-2 text-sm font-medium text-text">Full attention grid</summary>
+      <summary className="num cursor-pointer py-2 text-[0.8125rem] text-text">Full attention grid</summary>
       <div className="mt-2 grid gap-2">
         <canvas
           ref={canvasRef}
           role="img"
           aria-label="Attention grid. Each row is a token and each column is an earlier token it looked at."
-          className="aspect-square w-full max-w-md cursor-crosshair rounded-lg border border-border [image-rendering:pixelated]"
+          className="aspect-square w-full max-w-md cursor-crosshair rounded-[3px] border border-border [image-rendering:pixelated]"
           // clicking a row picks that token above
           onClick={(e) => {
             const box = e.currentTarget.getBoundingClientRect()

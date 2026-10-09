@@ -1,4 +1,4 @@
-"""Downloads TinyStories, trains the tokenizer and writes train.bin / val.bin."""
+"""Downloads a dataset (stories or recipes), trains the tokenizer and writes train.bin / val.bin."""
 import argparse
 import urllib.request
 from pathlib import Path
@@ -11,6 +11,13 @@ from tinygpt.tokenizer import BPETokenizer, EOT
 MODEL_ROOT = Path(__file__).resolve().parent.parent
 BASE_URL = "https://huggingface.co/datasets/roneneldan/TinyStories/resolve/main/"
 FILES = {"train": "TinyStoriesV2-GPT4-train.txt", "val": "TinyStoriesV2-GPT4-valid.txt"}
+RECIPES_URL = "https://huggingface.co/datasets/corbt/all-recipes/resolve/main/data/"
+RECIPES_FILES = [
+    "train-00000-of-00004-237b1b1141fdcfa1.parquet",
+    "train-00001-of-00004-d46654ac93566129.parquet",
+    "train-00002-of-00004-3b4f78b99eedadc2.parquet",
+    "train-00003-of-00004-2369b90eb0860a76.parquet",
+]
 
 
 # downloads one file in pieces so it never sits in ram
@@ -30,6 +37,35 @@ def download(url, dest):
             bar.update(len(chunk))
         bar.close()
     tmp.rename(dest)
+
+
+# downloads the recipes and writes them out in the same text format as the stories
+def build_recipes(raw_dir, skip_download):
+    import pyarrow.parquet as pq
+
+    train_txt, val_txt = raw_dir / "recipes-train.txt", raw_dir / "recipes-valid.txt"
+    if train_txt.exists() and val_txt.exists():
+        print("already have the recipe text files")
+        return train_txt, val_txt
+    count = 0
+    # write under temporary names so a run that gets cut off is not mistaken for a finished one
+    train_tmp, val_tmp = raw_dir / "recipes-train.tmp", raw_dir / "recipes-valid.tmp"
+    with open(train_tmp, "w", encoding="utf-8", newline="\n") as tr, open(val_tmp, "w", encoding="utf-8", newline="\n") as va:
+        for name in RECIPES_FILES:
+            if not skip_download:
+                download(RECIPES_URL + name, raw_dir / name)
+            for batch in pq.ParquetFile(raw_dir / name).iter_batches(batch_size=10000):
+                for text in batch.column(0).to_pylist():
+                    # the source has some broken characters, drop them
+                    text = text.replace(chr(0xFFFD), "").strip()
+                    # every 100th recipe is held out for validation
+                    out = va if count % 100 == 0 else tr
+                    out.write(text + "\n" + EOT + "\n")
+                    count += 1
+    train_tmp.replace(train_txt)
+    val_tmp.replace(val_txt)
+    print(f"wrote {count:,} recipes")
+    return train_txt, val_txt
 
 
 # reads the first max_bytes of a text file
@@ -82,7 +118,8 @@ def encode_file(tok, src, dest, chunk_bytes, max_bytes=None):
 
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument("--data-dir", default="data")
+    p.add_argument("--dataset", choices=["stories", "recipes"], default="stories")
+    p.add_argument("--data-dir", default=None, help="defaults to data for stories and data-recipes for recipes")
     p.add_argument("--vocab-size", type=int, default=4096)
     p.add_argument("--tokenizer-sample-mb", type=float, default=50, help="how much text the tokenizer learns from")
     p.add_argument("--max-train-mb", type=float, default=None, help="only tokenize this much of the train set")
@@ -90,17 +127,20 @@ def main():
     p.add_argument("--skip-download", action="store_true")
     args = p.parse_args()
 
-    data_dir = Path(args.data_dir)
+    data_dir = Path(args.data_dir or ("data" if args.dataset == "stories" else "data-recipes"))
     if not data_dir.is_absolute():
         data_dir = MODEL_ROOT / data_dir
     raw_dir = data_dir / "raw"
     raw_dir.mkdir(parents=True, exist_ok=True)
 
     # step 1: get the dataset
-    if not args.skip_download:
-        for name in FILES.values():
-            download(BASE_URL + name, raw_dir / name)
-    train_txt, val_txt = raw_dir / FILES["train"], raw_dir / FILES["val"]
+    if args.dataset == "recipes":
+        train_txt, val_txt = build_recipes(raw_dir, args.skip_download)
+    else:
+        if not args.skip_download:
+            for name in FILES.values():
+                download(BASE_URL + name, raw_dir / name)
+        train_txt, val_txt = raw_dir / FILES["train"], raw_dir / FILES["val"]
 
     # step 2: train the tokenizer on a sample, or reuse the one we already have
     tok_path = data_dir / "tokenizer.json"

@@ -60,7 +60,7 @@ export function SettingsPanel({ settings, onChange, disabled }: Props) {
         disabled={disabled}
       />
 
-      {/* same seed and settings give the same story every time */}
+      {/* same seed and settings give the same text every time */}
       <div className="grid gap-2">
         <label htmlFor={seedId} className="label">
           Seed
@@ -86,7 +86,7 @@ export function SettingsPanel({ settings, onChange, disabled }: Props) {
             <DiceFiveIcon size={18} />
           </button>
         </div>
-        <p className="text-xs leading-relaxed text-muted">The same seed and settings always give the same story.</p>
+        <p className="text-xs leading-relaxed text-muted">The same seed and settings always give the same text.</p>
       </div>
     </div>
   )
@@ -112,7 +112,7 @@ function Slider({ label, hint, value, min, max, step, format, onChange, disabled
         <label htmlFor={id} className="label">
           {label}
         </label>
-        <output htmlFor={id} className="num text-sm text-text">
+        <output htmlFor={id} className="num text-sm text-accent">
           {format(value)}
         </output>
       </div>

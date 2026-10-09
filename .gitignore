@@ -7,6 +7,7 @@ __pycache__/
 
 # data and training output
 model/data/
+model/data-recipes/
 model/runs/
 *.pt
 *.bin
@@ -18,6 +19,7 @@ web/dist/
 # big model files live in a github release, not in git
 web/public/models/small/
 web/public/models/base/
+web/public/models/recipes/
 web/public/models/smollm2-stories/
 
 # misc

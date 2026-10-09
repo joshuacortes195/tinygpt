@@ -21,6 +21,7 @@ def main():
     p.add_argument("--out", default=None, help="where to write the folder, defaults to web/public/models/<id>")
     p.add_argument("--no-manifest", action="store_true", help="don't touch manifest.json")
     p.add_argument("--default", action="store_true", help="make this the model the site opens with")
+    p.add_argument("--examples", nargs="*", default=None, help="starting prompts shown on the site, type \\n for a new line")
     args = p.parse_args()
 
     ckpt_path = Path(args.checkpoint)
@@ -44,7 +45,9 @@ def main():
     assert config["parity"]["fp32_max_logit_diff"] < 1e-3, "fp32 export does not match pytorch"
 
     if not args.no_manifest:
-        add_to_manifest(WEB_MODELS / "manifest.json", args.id, name, args.description, args.default)
+        # a typed backslash n in an example becomes a real new line
+        examples = [e.replace("\\n", "\n") for e in args.examples] if args.examples else None
+        add_to_manifest(WEB_MODELS / "manifest.json", args.id, name, args.description, args.default, examples)
         print(f"added {args.id} to manifest.json")
 
 

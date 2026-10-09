@@ -5,6 +5,8 @@ export interface ManifestEntry {
   description: string
   // folder name under models/, or a full url if the files live somewhere else
   path: string
+  // starting prompts that suit what this model was trained on
+  examples?: string[]
 }
 
 // an optional bigger model that runs through transformers.js and only loads when asked
@@ -55,7 +57,7 @@ export interface Metrics {
 export type Backend = 'webgpu' | 'wasm' | 'mock'
 export type Precision = 'fp32' | 'int8' | 'none'
 
-// the sliders in the playground
+// the sliders next to the prompt
 export interface SamplingSettings {
   temperature: number
   topK: number

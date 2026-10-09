@@ -2,17 +2,17 @@ import { GithubLogoIcon, MoonIcon, SunIcon } from '@phosphor-icons/react'
 import { useEffect, useState } from 'react'
 import { REPO_URL } from '../lib/links'
 
-export type Page = 'playground' | 'compare' | 'build'
+export type Page = 'try' | 'compare' | 'build'
 
 const LINKS: { page: Page; label: string; href: string }[] = [
-  { page: 'playground', label: 'Playground', href: '#/' },
+  { page: 'try', label: 'Try it', href: '#/' },
   { page: 'compare', label: 'Compare', href: '#/compare' },
   { page: 'build', label: 'How I built it', href: '#/build' },
 ]
 
 // reads the theme the page started with
 function currentTheme(): 'light' | 'dark' {
-  return document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light'
+  return document.documentElement.dataset.theme === 'light' ? 'light' : 'dark'
 }
 
 export function Header({ page }: { page: Page }) {
@@ -35,9 +35,11 @@ export function Header({ page }: { page: Page }) {
 
   return (
     <header className="sticky top-0 z-20 border-b border-border bg-bg/90 backdrop-blur">
-      <div className="mx-auto flex h-14 max-w-6xl items-center gap-2 px-4 sm:gap-6 sm:px-6">
-        <a href="#/" className="shrink-0 text-[1.0625rem] font-semibold tracking-tight">
-          TinyGPT
+      <div className="frame flex h-14 items-center gap-2 px-4 sm:gap-6 sm:px-7">
+        {/* site name with a little cursor block next to it */}
+        <a href="#/" className="num flex shrink-0 items-center gap-2 text-[0.9375rem] font-semibold tracking-tight">
+          <span className="h-4 w-2 bg-accent" aria-hidden="true" />
+          tinygpt
         </a>
 
         {/* page links, they scroll sideways on very small phones */}
@@ -47,13 +49,11 @@ export function Header({ page }: { page: Page }) {
               key={link.page}
               href={link.href}
               aria-current={page === link.page ? 'page' : undefined}
-              className={`flex h-11 shrink-0 items-center rounded-lg px-2.5 text-[0.9375rem] transition-colors sm:px-3 ${
-                page === link.page ? 'font-medium text-text' : 'text-muted hover:text-text'
+              className={`num flex h-14 shrink-0 items-center border-b-2 px-2.5 text-[0.8125rem] transition-colors sm:px-3 ${
+                page === link.page ? 'border-accent text-accent' : 'border-transparent text-muted hover:text-text'
               }`}
             >
-              <span className={page === link.page ? 'border-b-2 border-accent py-1' : 'border-b-2 border-transparent py-1'}>
-                {link.label}
-              </span>
+              {link.label}
             </a>
           ))}
         </nav>

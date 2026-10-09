@@ -75,9 +75,10 @@ export function BigModelPanel({ entry, prompt, settings }: Props) {
   const fraction = progress && progress.total > 0 ? progress.loaded / progress.total : 0
 
   return (
-    <section className="panel grid gap-5 p-4 sm:p-5" aria-label={entry.name}>
+    <section className="cell grid gap-5 border-t border-border" aria-label={entry.name}>
       <div>
-        <h2 className="text-lg font-semibold tracking-tight">{entry.name}</h2>
+        <p className="eyebrow mb-3">Optional, not built from scratch</p>
+        <h2 className="text-xl font-semibold tracking-tight">{entry.name}</h2>
         <p className="mt-1.5 max-w-[62ch] leading-relaxed text-muted">{entry.description}</p>
       </div>
 
@@ -107,9 +108,9 @@ export function BigModelPanel({ entry, prompt, settings }: Props) {
 
       {status === 'loading' && (
         <div className="grid max-w-md gap-1.5" role="status" aria-live="polite">
-          <div className="h-1.5 overflow-hidden rounded-full bg-surface-2">
+          <div className="h-1 overflow-hidden bg-surface-2">
             <div
-              className="h-full origin-left rounded-full bg-accent transition-transform duration-200 ease-out"
+              className="h-full origin-left bg-accent transition-transform duration-200 ease-out"
               style={{ transform: `scaleX(${Math.max(0.02, fraction)})` }}
             />
           </div>

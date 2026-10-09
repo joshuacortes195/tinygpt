@@ -1,6 +1,6 @@
 import type { Candidate, SamplingSettings } from './types'
 
-// small seeded random number generator so the same seed gives the same story
+// small seeded random number generator so the same seed gives the same text
 export function mulberry32(seed: number): () => number {
   let a = seed >>> 0
   return () => {

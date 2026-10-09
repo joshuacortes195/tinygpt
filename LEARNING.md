@@ -205,7 +205,7 @@ The output panel has four tabs. Each one shows the same generated text from a di
 
 - *What does an attention head actually do?* For each token it produces a set of weights over the earlier tokens. Different heads learn different patterns, and you can flip between them to see that.
 - *Why can a model pick a token that was not its top guess?* Sampling. With temperature above 0 the model rolls dice weighted by probability, which is what keeps the writing from looping.
-- *Why not always take the most likely token?* Greedy decoding gets repetitive quickly. Set temperature to 0 in the playground to see it happen.
+- *Why not always take the most likely token?* Greedy decoding gets repetitive quickly. Set temperature to 0 on the Try it page to see it happen.
 - *What does low probability on a token tell you?* That the model was choosing between many reasonable options there, like a character's name, as opposed to a spot where grammar forces the answer.
 
 

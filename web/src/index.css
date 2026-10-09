@@ -2,47 +2,45 @@
 @import '@fontsource-variable/geist';
 @import '@fontsource-variable/geist-mono';
 
-/* dark mode follows the data-theme attribute on <html> */
+/* light mode follows the data-theme attribute on <html>, dark is the default */
 @custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
 
-/* light theme colors */
+/* dark theme colors, the look the site opens with */
 :root {
-  --bg: oklch(0.982 0.003 250);
-  --surface: oklch(0.997 0.001 250);
-  --surface-2: oklch(0.962 0.004 250);
-  --border: oklch(0.905 0.006 250);
-  --border-strong: oklch(0.82 0.008 250);
-  --text: oklch(0.21 0.012 255);
-  --muted: oklch(0.47 0.014 255);
-  --accent: oklch(0.56 0.19 36);
-  --accent-fg: oklch(0.99 0.005 60);
-  --accent-soft: oklch(0.94 0.04 45);
-  --danger: oklch(0.52 0.19 25);
-  --heat: 0.56 0.19 36;
-  --tok-l: 0.925;
-  --tok-c: 0.055;
-  --shadow: 0 1px 2px oklch(0.3 0.02 255 / 0.06), 0 8px 24px -12px oklch(0.3 0.02 255 / 0.18);
-  color-scheme: light;
+  --bg: oklch(0.15 0.008 170);
+  --surface: oklch(0.18 0.009 170);
+  --surface-2: oklch(0.225 0.011 170);
+  --border: oklch(0.275 0.012 170);
+  --border-strong: oklch(0.4 0.016 170);
+  --text: oklch(0.95 0.008 160);
+  --muted: oklch(0.72 0.016 168);
+  --accent: oklch(0.87 0.2 152);
+  --accent-fg: oklch(0.17 0.035 155);
+  --accent-soft: oklch(0.3 0.075 155);
+  --danger: oklch(0.76 0.16 25);
+  --heat: 0.87 0.2 152;
+  --tok-l: 0.34;
+  --tok-c: 0.07;
+  color-scheme: dark;
 }
 
-/* dark theme colors */
-[data-theme='dark'] {
-  --bg: oklch(0.165 0.007 255);
-  --surface: oklch(0.2 0.008 255);
-  --surface-2: oklch(0.245 0.009 255);
-  --border: oklch(0.295 0.01 255);
-  --border-strong: oklch(0.4 0.012 255);
-  --text: oklch(0.95 0.004 255);
-  --muted: oklch(0.72 0.012 255);
-  --accent: oklch(0.74 0.16 48);
-  --accent-fg: oklch(0.18 0.02 45);
-  --accent-soft: oklch(0.32 0.06 45);
-  --danger: oklch(0.72 0.16 25);
-  --heat: 0.74 0.16 48;
-  --tok-l: 0.34;
+/* light theme colors */
+[data-theme='light'] {
+  --bg: oklch(0.975 0.004 165);
+  --surface: oklch(0.995 0.002 165);
+  --surface-2: oklch(0.95 0.006 165);
+  --border: oklch(0.89 0.008 165);
+  --border-strong: oklch(0.76 0.012 165);
+  --text: oklch(0.2 0.015 170);
+  --muted: oklch(0.45 0.018 170);
+  --accent: oklch(0.5 0.14 155);
+  --accent-fg: oklch(0.99 0.01 155);
+  --accent-soft: oklch(0.92 0.06 155);
+  --danger: oklch(0.52 0.19 25);
+  --heat: 0.62 0.17 152;
+  --tok-l: 0.92;
   --tok-c: 0.06;
-  --shadow: 0 1px 2px oklch(0 0 0 / 0.3), 0 12px 32px -12px oklch(0 0 0 / 0.6);
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 /* hooks the colors and fonts into tailwind class names */
@@ -83,7 +81,7 @@ body {
 :focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
-  border-radius: 4px;
+  border-radius: 2px;
 }
 
 ::selection {
@@ -91,6 +89,40 @@ body {
 }
 
 @layer components {
+/* the page column, with a thin line down each side on wide screens */
+.frame {
+  width: 100%;
+  max-width: 76rem;
+  margin-inline: auto;
+}
+
+@media (min-width: 80rem) {
+  .frame {
+    border-inline: 1px solid var(--border);
+  }
+}
+
+/* padding every section of the page shares */
+.cell {
+  padding: 1.5rem 1rem;
+}
+
+@media (min-width: 40rem) {
+  .cell {
+    padding: 2rem 1.75rem;
+  }
+}
+
+/* small monospace headings above each part */
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
 /* styling for buttons */
 .btn {
   display: inline-flex;
@@ -99,11 +131,12 @@ body {
   gap: 0.5rem;
   min-height: 2.75rem;
   padding: 0 1rem;
-  border-radius: 8px;
+  border-radius: 3px;
   border: 1px solid var(--border-strong);
-  background: var(--surface);
+  background: transparent;
   color: var(--text);
-  font-size: 0.9375rem;
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
   font-weight: 500;
   white-space: nowrap;
   cursor: pointer;
@@ -111,7 +144,8 @@ body {
   transition:
     transform 140ms var(--ease-out-strong),
     background-color 140ms ease,
-    border-color 140ms ease;
+    border-color 140ms ease,
+    color 140ms ease;
 }
 
 .btn:active:not(:disabled) {
@@ -128,6 +162,7 @@ body {
   border-color: transparent;
   background: var(--accent);
   color: var(--accent-fg);
+  font-weight: 600;
 }
 
 /* quiet button for secondary actions */
@@ -136,17 +171,43 @@ body {
   background: transparent;
 }
 
+/* small pill buttons, used for the example prompts */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+  border-radius: 3px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition:
+    border-color 140ms ease,
+    color 140ms ease;
+}
+
 @media (hover: hover) and (pointer: fine) {
   .btn:hover:not(:disabled) {
-    border-color: var(--text);
+    border-color: var(--accent);
+    color: var(--accent);
   }
   .btn-primary:hover:not(:disabled) {
     border-color: transparent;
-    background: color-mix(in oklch, var(--accent) 88%, var(--text));
+    color: var(--accent-fg);
+    background: color-mix(in oklch, var(--accent) 86%, var(--text));
   }
   .btn-ghost:hover:not(:disabled) {
     border-color: transparent;
+    color: var(--text);
     background: var(--surface-2);
+  }
+  .chip:hover {
+    border-color: var(--border-strong);
+    color: var(--text);
   }
 }
 
@@ -155,7 +216,7 @@ body {
   width: 100%;
   min-height: 2.75rem;
   padding: 0.625rem 0.75rem;
-  border-radius: 8px;
+  border-radius: 3px;
   border: 1px solid var(--border-strong);
   background: var(--surface);
   color: var(--text);
@@ -182,14 +243,17 @@ body {
 /* boxed sections */
 .panel {
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 4px;
   background: var(--surface);
 }
 
 /* small label text above controls */
 .label {
-  font-size: 0.8125rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
   font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   color: var(--muted);
 }
 
@@ -202,7 +266,7 @@ body {
 /* colored token chips, the hue comes from --h on the element */
 .tok {
   background: oklch(var(--tok-l) var(--tok-c) var(--h, 250));
-  border-radius: 4px;
+  border-radius: 2px;
 }
 
 /* each new token fades in as the model writes it */
@@ -247,7 +311,7 @@ body {
 
 /* loading placeholder shimmer */
 .skeleton {
-  border-radius: 6px;
+  border-radius: 3px;
   background: linear-gradient(90deg, var(--surface-2) 25%, var(--border) 50%, var(--surface-2) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.2s linear infinite;
@@ -269,7 +333,8 @@ body {
   .caret {
     animation: none;
   }
-  .btn {
+  .btn,
+  .chip {
     transition: none;
   }
 }

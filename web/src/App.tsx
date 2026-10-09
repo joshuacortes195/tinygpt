@@ -6,14 +6,14 @@ import { MOCK_ENTRY } from './lib/models'
 import type { ExtraEntry, ManifestEntry } from './lib/types'
 import { Build } from './pages/Build'
 import { Compare } from './pages/Compare'
-import { Playground } from './pages/Playground'
+import { TryIt } from './pages/TryIt'
 
 // which page the url hash points at
 function pageFromHash(): Page {
   const hash = window.location.hash.replace(/^#\/?/, '')
   if (hash.startsWith('compare')) return 'compare'
   if (hash.startsWith('build')) return 'build'
-  return 'playground'
+  return 'try'
 }
 
 type ManifestState =
@@ -65,7 +65,7 @@ export default function App() {
     <div className="flex min-h-dvh flex-col">
       <a
         href="#main"
-        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-30 focus:rounded-lg focus:bg-surface focus:px-3 focus:py-2"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-30 focus:rounded-[3px] focus:bg-surface focus:px-3 focus:py-2"
       >
         Skip to content
       </a>
@@ -73,7 +73,7 @@ export default function App() {
 
       <main id="main" className="flex-1">
         {manifest.status === 'loading' && (
-          <div className="mx-auto grid max-w-6xl gap-4 px-4 py-12 sm:px-6" aria-label="Loading">
+          <div className="frame cell grid gap-4 sm:py-12" aria-label="Loading">
             <div className="skeleton h-10 w-2/3 max-w-lg" />
             <div className="skeleton h-5 w-full max-w-xl" />
             <div className="skeleton mt-6 h-48 w-full" />
@@ -81,9 +81,9 @@ export default function App() {
         )}
 
         {manifest.status === 'error' && (
-          <div className="mx-auto max-w-2xl px-4 py-16 sm:px-6" role="alert">
+          <div className="frame cell sm:py-16" role="alert">
             <h1 className="text-2xl font-semibold tracking-tight">The model list did not load.</h1>
-            <p className="mt-3 leading-relaxed text-muted">
+            <p className="mt-3 max-w-[60ch] leading-relaxed text-muted">
               {manifest.message}. Check your connection and reload the page.
             </p>
             <button type="button" className="btn btn-primary mt-6" onClick={() => window.location.reload()}>
@@ -93,7 +93,7 @@ export default function App() {
         )}
 
         {manifest.status === 'ready' && manifest.models.length === 0 && (
-          <div className="mx-auto max-w-2xl px-4 py-16 sm:px-6">
+          <div className="frame cell sm:py-16">
             <h1 className="text-2xl font-semibold tracking-tight">No models are listed yet.</h1>
             <p className="mt-3 leading-relaxed text-muted">
               Add a model folder and an entry in manifest.json and it will show up here.
@@ -103,9 +103,9 @@ export default function App() {
 
         {manifest.status === 'ready' && manifest.models.length > 0 && (
           <>
-            <div hidden={page !== 'playground'}>
-              {visited.has('playground') && (
-                <Playground models={manifest.models} selectedId={selectedId} onSelect={setSelectedId} />
+            <div hidden={page !== 'try'}>
+              {visited.has('try') && (
+                <TryIt models={manifest.models} selectedId={selectedId} onSelect={setSelectedId} />
               )}
             </div>
             <div hidden={page !== 'compare'}>
@@ -119,9 +119,9 @@ export default function App() {
       </main>
 
       <footer className="border-t border-border">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-6 gap-y-2 px-4 py-6 text-sm text-muted sm:px-6">
+        <div className="frame num flex flex-wrap items-center justify-between gap-x-6 gap-y-2 px-4 py-5 text-xs text-muted sm:px-7">
           <p>Built by Joshua Cortes. The model runs on your device and nothing you type is uploaded.</p>
-          <a href={REPO_URL} className="flex min-h-11 items-center font-medium text-text hover:underline">
+          <a href={REPO_URL} className="flex min-h-11 items-center text-text hover:text-accent">
             Source on GitHub
           </a>
         </div>

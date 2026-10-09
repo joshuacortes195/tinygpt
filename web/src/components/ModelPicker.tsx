@@ -47,10 +47,10 @@ export function ModelPicker({ label = 'Model', models, selectedId, onSelect, sta
 
       {/* which backend the model ended up on */}
       {state.status === 'ready' && state.model.generator.info && (
-        <dl className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted">
+        <dl className="num flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted">
           <div>
             <dt className="sr-only">Running on</dt>
-            <dd className="font-medium text-text">{BACKEND_LABEL[state.model.generator.info.backend]}</dd>
+            <dd className="text-accent">{BACKEND_LABEL[state.model.generator.info.backend]}</dd>
           </div>
           {state.model.generator.info.precision !== 'none' && (
             <div>
@@ -69,7 +69,7 @@ export function ModelPicker({ label = 'Model', models, selectedId, onSelect, sta
 
       {/* what went wrong and a way to try again */}
       {state.status === 'error' && (
-        <div role="alert" className="grid gap-2 rounded-lg border border-danger/40 p-3 text-sm">
+        <div role="alert" className="grid gap-2 rounded-[3px] border border-danger/40 p-3 text-sm">
           <p className="flex items-start gap-2 font-medium text-danger">
             <WarningIcon size={18} className="mt-0.5 shrink-0" />
             This model could not start in your browser.
@@ -98,10 +98,10 @@ function LoadingBar({ state }: { state: Extract<ModelState, { status: 'loading' 
 
   return (
     <div className="grid gap-1.5" role="status" aria-live="polite">
-      <div className="h-1.5 overflow-hidden rounded-full bg-surface-2">
+      <div className="h-1 overflow-hidden bg-surface-2">
         {/* grows from the left as bytes arrive */}
         <div
-          className="h-full origin-left rounded-full bg-accent transition-transform duration-200 ease-out"
+          className="h-full origin-left bg-accent transition-transform duration-200 ease-out"
           style={{ transform: `scaleX(${Math.max(0.02, fraction)})` }}
         />
       </div>

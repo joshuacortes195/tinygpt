@@ -51,10 +51,11 @@ export function Compare({ models, defaultId, extras }: Props) {
   }
 
   return (
-    <div className="mx-auto grid max-w-6xl gap-8 px-4 py-8 sm:px-6 lg:py-12">
-      <div>
-        <h1 className="text-3xl leading-[1.1] font-semibold tracking-tight sm:text-4xl">Same prompt, two models.</h1>
-        <p className="mt-3 max-w-[60ch] leading-relaxed text-muted">
+    <div className="frame">
+      <div className="cell border-b border-border sm:py-12">
+        <p className="eyebrow">Compare</p>
+        <h1 className="mt-4 text-[2rem] leading-[1.05] font-semibold tracking-tight sm:text-5xl">Same prompt, two models.</h1>
+        <p className="mt-4 max-w-[58ch] leading-relaxed text-muted">
           Both models get the same prompt, settings and seed. The only thing that changes is the model, so any
           difference in the writing comes from size and training.
         </p>
@@ -62,7 +63,7 @@ export function Compare({ models, defaultId, extras }: Props) {
 
       {/* shared prompt and run button */}
       <form
-        className="grid gap-3"
+        className="cell grid gap-3 border-b border-border"
         onSubmit={(e) => {
           e.preventDefault()
           if (running) stopBoth()
@@ -88,9 +89,9 @@ export function Compare({ models, defaultId, extras }: Props) {
       </form>
 
       {/* the two outputs, side by side on wide screens and stacked on phones */}
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid md:grid-cols-2">
         <Side title="Model A" models={models} side={left} disabled={running} />
-        <Side title="Model B" models={models} side={right} disabled={running} />
+        <Side title="Model B" models={models} side={right} disabled={running} divided />
       </div>
 
       {/* optional bigger models, each behind its own download button */}
@@ -98,8 +99,8 @@ export function Compare({ models, defaultId, extras }: Props) {
         <BigModelPanel key={extra.id} entry={extra} prompt={prompt} settings={settings} />
       ))}
 
-      <details className="border-t border-border pt-4">
-        <summary className="cursor-pointer py-2 text-sm font-semibold">Sampling settings</summary>
+      <details className="cell border-t border-border">
+        <summary className="eyebrow cursor-pointer py-2">Sampling settings</summary>
         <div className="mt-4 max-w-sm">
           <SettingsPanel settings={settings} onChange={setSettings} disabled={running} />
         </div>
@@ -113,15 +114,21 @@ function Side({
   models,
   side,
   disabled,
+  divided,
 }: {
   title: string
   models: ManifestEntry[]
   side: ReturnType<typeof useSide>
   disabled: boolean
+  divided?: boolean
 }) {
   const { model, generation } = side
   return (
-    <section className="panel grid min-w-0 content-start gap-5 p-4 sm:p-5" aria-label={title}>
+    <section
+      // a line between the two sides: above when stacked, to the left when side by side
+      className={`cell grid min-w-0 content-start gap-5 ${divided ? 'border-t border-border md:border-t-0 md:border-l' : ''}`}
+      aria-label={title}
+    >
       <ModelPicker
         label={title}
         models={models}
@@ -147,10 +154,10 @@ function Side({
 
       {/* speed and size, so the tradeoff is visible */}
       {model && generation.stats && (
-        <dl className="num grid grid-cols-3 gap-3 border-t border-border pt-4 text-sm">
+        <dl className="num grid grid-cols-3 gap-3 border-t border-border pt-4 text-[0.8125rem]">
           <div>
             <dt className="text-xs text-muted">Speed</dt>
-            <dd>{generation.stats.tokensPerSecond.toFixed(1)} tok/s</dd>
+            <dd className="text-accent">{generation.stats.tokensPerSecond.toFixed(1)} tok/s</dd>
           </div>
           <div>
             <dt className="text-xs text-muted">Tokens</dt>

@@ -32,9 +32,9 @@ Last updated: 2026-10-08
 
 **Phase 3.** ONNX export (fp32 + int8) with parity checks. v0 exported to `web/public/models/v0-smoke/` and listed in `manifest.json`. fp32 max logit diff 1.3e-5, int8 top-1 agreement 100%.
 
-**Phase 4.** Playground with model picker, streaming output, sliders, seed, Stop. `TextGenerator` interface with a mock and a Web Worker ONNX implementation (WebGPU first, WebAssembly fallback). Tested in headless Chrome at desktop and phone sizes, light and dark, on both backends.
+**Phase 4.** Try it page (first called Playground) with model picker, streaming output, sliders, seed, Stop. `TextGenerator` interface with a mock and a Web Worker ONNX implementation (WebGPU first, WebAssembly fallback). Tested in headless Chrome at desktop and phone sizes, light and dark, on both backends.
 
-**Phase 5.** Token, probability and attention views inside the playground's output panel, plus a Compare page. All work with v0, and the attention view degrades when a model has no attention output.
+**Phase 5.** Token, probability and attention views inside the Try it page's output panel, plus a Compare page. All work with v0, and the attention view degrades when a model has no attention output.
 
 **Phase 6.** Build page (stats, loss curve and architecture all read from the model's files), `TRAINING.md`, README. Live at https://joshuacortes195.github.io/tinygpt/ running v0. Deploy with `npm run deploy` from `web/`. Verified against the live URL in headless Chrome.
 
@@ -49,3 +49,15 @@ Follow TRAINING.md. A run is finished when the last line of `model/runs/<name>/m
 
 - **CI workflow is not on GitHub yet.** The saved GitHub login doesn't have the `workflow` permission, so pushing `.github/workflows/ci.yml` is rejected. The file is committed on the local `ci` branch. To turn CI on: run `gh auth refresh -s workflow`, then `git checkout main && git merge ci && git push`.
 - Safari can't be tested from this Windows machine. Chrome and Edge are covered; Safari needs a check on a Mac or iPhone.
+
+## Recipes model (in progress)
+
+A second from-scratch model, same size as base, trained on recipes instead of stories so the site has something other than children's stories.
+
+- Data: `python scripts/prepare_data.py --dataset recipes --max-train-mb 1200` (2.1M recipes, 329M train tokens, its own tokenizer in `model/data-recipes/`).
+- Training: `python scripts/train.py configs/recipes.yaml`, started 2026-10-08 around 21:45, 36,000 steps, about 2 h 45 min. Log in `model/runs/recipes.log`.
+- When it finishes: export with `scripts/export_onnx.py runs/recipes/ckpt.pt --id recipes --name "Recipes (27M)" --examples ...`, deploy, add the results to README and LEARNING.md.
+
+## Redesign
+
+The site was restyled on 2026-10-08: dark by default with a green accent, the Playground page is now called Try it, and the flow chart on the build page runs left to right.

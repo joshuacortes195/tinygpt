@@ -12,6 +12,8 @@ dependencies = ["numpy", "regex", "pyyaml", "tqdm"]
 
 [project.optional-dependencies]
 dev = ["pytest", "onnx", "onnxruntime"]
+# only needed to read the recipes dataset
+recipes = ["pyarrow"]
 # only needed for the fine-tuned comparison model
 finetune = ["transformers", "optimum[onnxruntime]"]
 

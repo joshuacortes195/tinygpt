@@ -71,19 +71,21 @@ export function Build({ models, defaultId }: Props) {
   const config = data?.config
 
   return (
-    <div className="mx-auto grid max-w-6xl gap-14 px-4 py-8 sm:px-6 lg:py-12">
-      <div>
-        <h1 className="text-3xl leading-[1.1] font-semibold tracking-tight sm:text-4xl">How I built it.</h1>
-        <p className="mt-3 max-w-[62ch] leading-relaxed text-muted">
-          Everything that matters is written from scratch in PyTorch: the tokenizer, the transformer and the
-          training loop. No pretrained weights and no model libraries. It learned English from about 2 GB of short
-          children's stories.
+    <div className="frame">
+      <div className="cell border-b border-border sm:py-12">
+        <p className="eyebrow">How I built it</p>
+        <h1 className="mt-4 max-w-[22ch] text-[2rem] leading-[1.05] font-semibold tracking-tight sm:text-5xl">
+          Every part written by hand.
+        </h1>
+        <p className="mt-4 max-w-[60ch] leading-relaxed text-muted">
+          The tokenizer, the transformer and the training loop are all my own PyTorch code. No pretrained weights
+          and no model libraries. Each model here learned to write from nothing but its training text.
         </p>
       </div>
 
       {/* pick which model the numbers below describe */}
-      <section className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:gap-14">
-        <div className="grid content-start gap-6">
+      <section className="grid border-b border-border lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
+        <div className="cell grid content-start gap-6">
           <div className="grid max-w-xs gap-2">
             <label htmlFor={selectId} className="label">
               Show details for
@@ -106,8 +108,8 @@ export function Build({ models, defaultId }: Props) {
 
           {/* model facts read from config.json */}
           {config && (
-            <dl className="grid grid-cols-2 gap-x-6 gap-y-5">
-              <Stat label="Parameters" value={formatCount(config.params)} />
+            <dl className="grid grid-cols-2 border-t border-l border-border">
+              <Stat label="Parameters" value={formatCount(config.params)} strong />
               <Stat label="Layers" value={String(config.n_layer)} />
               <Stat label="Attention heads" value={`${config.n_head} per layer`} />
               <Stat label="Vector width" value={String(config.n_embd)} />
@@ -118,6 +120,7 @@ export function Build({ models, defaultId }: Props) {
               <Stat
                 label="Validation loss"
                 value={config.final_val_loss === null ? 'n/a' : config.final_val_loss.toFixed(3)}
+                strong
               />
               <Stat
                 label="Download size"
@@ -127,8 +130,8 @@ export function Build({ models, defaultId }: Props) {
           )}
         </div>
 
-        <div className="min-w-0">
-          <h2 className="mb-4 text-lg font-semibold tracking-tight">Loss during training</h2>
+        <div className="cell min-w-0 border-t border-border lg:border-t-0 lg:border-l">
+          <h2 className="eyebrow mb-5">Loss during training</h2>
           {data ? (
             data.metrics ? (
               <LossChart metrics={data.metrics} />
@@ -141,46 +144,46 @@ export function Build({ models, defaultId }: Props) {
         </div>
       </section>
 
-      {/* the architecture, top to bottom */}
+      {/* the architecture, left to right */}
       {config && (
-        <section className="grid gap-8 border-t border-border pt-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:gap-14">
-          <div>
-            <h2 className="text-lg font-semibold tracking-tight">What happens to your text</h2>
-            <p className="mt-3 max-w-[52ch] leading-relaxed text-muted">
-              The model only ever does one thing: given some tokens, guess the next one. To write a story it
-              guesses, adds the guess to the text, and goes again. The highlighted step is the one the Attention
-              tab in the playground lets you look inside.
-            </p>
-          </div>
+        <section className="cell border-b border-border">
+          <h2 className="eyebrow">What happens to your text</h2>
+          <p className="mt-4 mb-8 max-w-[64ch] leading-relaxed text-muted">
+            The model only ever does one thing: given some tokens, guess the next one. To write, it guesses, adds
+            the guess to the text, and goes again. The highlighted step is the one the Attention tab on the Try it
+            page lets you look inside.
+          </p>
           <ArchitectureDiagram config={config} />
         </section>
       )}
 
       {/* write-ups */}
-      <section className="border-t border-border pt-12">
-        <h2 className="text-lg font-semibold tracking-tight">Notes from building it</h2>
-        <div className="mt-6 grid gap-x-12 gap-y-8 sm:grid-cols-2">
-          {NOTES.map((note) => (
-            <article key={note.title} className="max-w-[48ch]">
-              <h3 className="font-medium">{note.title}</h3>
-              <p className="mt-1.5 leading-relaxed text-muted">{note.body}</p>
+      <section>
+        <h2 className="eyebrow cell !pb-0">Notes from building it</h2>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3">
+          {NOTES.map((note, i) => (
+            <article key={note.title} className="cell flex flex-col">
+              <p className="num text-xs text-accent">{String(i + 1).padStart(2, '0')}</p>
+              <h3 className="mt-2 font-medium">{note.title}</h3>
+              <p className="mt-2 max-w-[46ch] flex-1 leading-relaxed text-muted">{note.body}</p>
               <a
                 href={learningLink(note.anchor)}
-                className="mt-2 inline-flex min-h-11 items-center gap-1 text-sm font-medium text-accent hover:underline"
+                className="num mt-2 inline-flex min-h-11 items-center gap-1 self-start text-[0.8125rem] text-accent hover:underline"
               >
                 Read the notes
                 <ArrowUpRightIcon size={14} />
               </a>
             </article>
           ))}
-          <article className="max-w-[48ch]">
-            <h3 className="font-medium">All of the code</h3>
-            <p className="mt-1.5 leading-relaxed text-muted">
+          <article className="cell flex flex-col">
+            <p className="num text-xs text-accent">{String(NOTES.length + 1).padStart(2, '0')}</p>
+            <h3 className="mt-2 font-medium">All of the code</h3>
+            <p className="mt-2 max-w-[46ch] flex-1 leading-relaxed text-muted">
               The model, the training scripts, the tests and this website are in one repository.
             </p>
             <a
               href={REPO_URL}
-              className="mt-2 inline-flex min-h-11 items-center gap-1 text-sm font-medium text-accent hover:underline"
+              className="num mt-2 inline-flex min-h-11 items-center gap-1 self-start text-[0.8125rem] text-accent hover:underline"
             >
               View the source
               <ArrowUpRightIcon size={14} />
@@ -192,11 +195,12 @@ export function Build({ models, defaultId }: Props) {
   )
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
+// one box in the spec sheet
+function Stat({ label, value, strong }: { label: string; value: string; strong?: boolean }) {
   return (
-    <div>
-      <dt className="text-sm text-muted">{label}</dt>
-      <dd className="num mt-0.5 text-lg">{value}</dd>
+    <div className="border-r border-b border-border p-3 sm:p-4">
+      <dt className="label">{label}</dt>
+      <dd className={`num mt-1.5 text-lg ${strong ? 'text-accent' : ''}`}>{value}</dd>
     </div>
   )
 }
