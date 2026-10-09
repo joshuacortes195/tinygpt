@@ -17,6 +17,8 @@ export interface ExtraEntry extends ManifestEntry {
 
 export interface Manifest {
   default: string
+  // the two models the compare page starts with
+  compare?: string[]
   models: ManifestEntry[]
   extras?: ExtraEntry[]
 }

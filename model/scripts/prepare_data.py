@@ -1,5 +1,6 @@
-"""Downloads a dataset (stories or recipes), trains the tokenizer and writes train.bin / val.bin."""
+"""Downloads a dataset (kids stories, general stories or recipes), trains the tokenizer and writes train.bin / val.bin."""
 import argparse
+import json
 import urllib.request
 from pathlib import Path
 
@@ -37,6 +38,43 @@ def download(url, dest):
             bar.update(len(chunk))
         bar.close()
     tmp.rename(dest)
+GENERAL_URL = "https://huggingface.co/datasets/ajibawa-2023/General-Stories-Collection/resolve/main/"
+# the set has 10 of these files, 3 is already more text than a run gets through
+GENERAL_FILES = [f"General Stories-{i}-Final.json" for i in range(3)]
+DEFAULT_DIRS = {"stories": "data", "recipes": "data-recipes", "general": "data-general"}
+
+
+# downloads the general audience stories and writes them out in the same text format as the kids stories
+def build_general(raw_dir, skip_download):
+    train_txt, val_txt = raw_dir / "general-train.txt", raw_dir / "general-valid.txt"
+    if train_txt.exists() and val_txt.exists():
+        print("already have the general story text files")
+        return train_txt, val_txt
+    count = 0
+    marker = '"text": '
+    # write under temporary names so a run that gets cut off is not mistaken for a finished one
+    train_tmp, val_tmp = raw_dir / "general-train.tmp", raw_dir / "general-valid.tmp"
+    with open(train_tmp, "w", encoding="utf-8", newline="\n") as tr, open(val_tmp, "w", encoding="utf-8", newline="\n") as va:
+        for name in GENERAL_FILES:
+            if not skip_download:
+                download(GENERAL_URL + name.replace(" ", "%20"), raw_dir / name)
+            # each file is one huge json list, so pick the story lines out one at a time instead of loading it all
+            with open(raw_dir / name, "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if not line.startswith(marker):
+                        continue
+                    text = json.loads(line[len(marker):].rstrip(",")).strip()
+                    if not text:
+                        continue
+                    # every 100th story is held out for validation
+                    out = va if count % 100 == 0 else tr
+                    out.write(text + "\n" + EOT + "\n")
+                    count += 1
+    train_tmp.replace(train_txt)
+    val_tmp.replace(val_txt)
+    print(f"wrote {count:,} stories")
+    return train_txt, val_txt
 
 
 # downloads the recipes and writes them out in the same text format as the stories
@@ -118,8 +156,8 @@ def encode_file(tok, src, dest, chunk_bytes, max_bytes=None):
 
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument("--dataset", choices=["stories", "recipes"], default="stories")
-    p.add_argument("--data-dir", default=None, help="defaults to data for stories and data-recipes for recipes")
+    p.add_argument("--dataset", choices=["stories", "recipes", "general"], default="stories")
+    p.add_argument("--data-dir", default=None, help="defaults to data, data-recipes or data-general depending on the dataset")
     p.add_argument("--vocab-size", type=int, default=4096)
     p.add_argument("--tokenizer-sample-mb", type=float, default=50, help="how much text the tokenizer learns from")
     p.add_argument("--max-train-mb", type=float, default=None, help="only tokenize this much of the train set")
@@ -127,7 +165,7 @@ def main():
     p.add_argument("--skip-download", action="store_true")
     args = p.parse_args()
 
-    data_dir = Path(args.data_dir or ("data" if args.dataset == "stories" else "data-recipes"))
+    data_dir = Path(args.data_dir or DEFAULT_DIRS[args.dataset])
     if not data_dir.is_absolute():
         data_dir = MODEL_ROOT / data_dir
     raw_dir = data_dir / "raw"
@@ -136,6 +174,8 @@ def main():
     # step 1: get the dataset
     if args.dataset == "recipes":
         train_txt, val_txt = build_recipes(raw_dir, args.skip_download)
+    elif args.dataset == "general":
+        train_txt, val_txt = build_general(raw_dir, args.skip_download)
     else:
         if not args.skip_download:
             for name in FILES.values():

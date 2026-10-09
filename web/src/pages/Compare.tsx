@@ -13,6 +13,8 @@ interface Props {
   models: ManifestEntry[]
   defaultId: string
   extras: ExtraEntry[]
+  // the two model ids to start with, when the manifest names them
+  pair: string[]
 }
 
 // one side of the comparison: its own model, its own output
@@ -26,13 +28,18 @@ function useSide(models: ManifestEntry[], initialId: string) {
   return { id, setId, state, model, generation, retry: () => setRetry((n) => n + 1) }
 }
 
-export function Compare({ models, defaultId, extras }: Props) {
+export function Compare({ models, defaultId, extras, pair }: Props) {
   const promptId = useId()
-  // start with two different models when there are at least two
-  const otherId = models.find((m) => m.id !== defaultId)?.id ?? defaultId
-  const left = useSide(models, otherId)
-  const right = useSide(models, defaultId)
-  const [prompt, setPrompt] = useState('Once upon a time, there was a little dog named')
+  // start with the pair the manifest asks for, or else any two different models
+  const has = (id: string | undefined) => models.some((m) => m.id === id)
+  const rightId = has(pair[1]) ? pair[1] : defaultId
+  const leftId = has(pair[0]) ? pair[0] : (models.find((m) => m.id !== rightId)?.id ?? rightId)
+  const left = useSide(models, leftId)
+  const right = useSide(models, rightId)
+  // open with a prompt that suits the models being compared
+  const [prompt, setPrompt] = useState(
+    () => models.find((m) => m.id === rightId)?.examples?.[0] ?? 'Once upon a time, there was a little dog named',
+  )
   const [settings, setSettings] = useState<SamplingSettings>({ ...DEFAULT_SETTINGS, maxTokens: 80 })
 
   const running = left.generation.running || right.generation.running

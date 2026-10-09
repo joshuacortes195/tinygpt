@@ -11,7 +11,7 @@ export function ArchitectureDiagram({ config }: { config: ModelConfig }) {
       <div className="overflow-x-auto pb-2" tabIndex={0} role="group" aria-label="Model architecture, scrolls sideways">
         <div className="min-w-[66rem]">
           <ol className="flex items-stretch" aria-label="Model architecture, from input to output">
-            <Step n="01" title="Your text" detail={'"Once upon a time"'} />
+            <Step n="01" title="Your text" detail={'"It was a quiet morning"'} />
             <Arrow />
             <Step n="02" title="Tokenizer" detail={`Text is cut into ids from a vocab of ${vocab}`} />
             <Arrow />

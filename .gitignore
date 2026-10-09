@@ -8,6 +8,7 @@ __pycache__/
 # data and training output
 model/data/
 model/data-recipes/
+model/data-general/
 model/runs/
 *.pt
 *.bin
@@ -20,6 +21,8 @@ web/dist/
 web/public/models/small/
 web/public/models/base/
 web/public/models/recipes/
+web/public/models/stories/
+web/public/models/stories-small/
 web/public/models/smollm2-stories/
 
 # misc

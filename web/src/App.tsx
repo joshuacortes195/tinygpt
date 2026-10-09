@@ -18,7 +18,7 @@ function pageFromHash(): Page {
 
 type ManifestState =
   | { status: 'loading' }
-  | { status: 'ready'; models: ManifestEntry[]; defaultId: string; extras: ExtraEntry[] }
+  | { status: 'ready'; models: ManifestEntry[]; defaultId: string; extras: ExtraEntry[]; compare: string[] }
   | { status: 'error'; message: string }
 
 export default function App() {
@@ -47,13 +47,13 @@ export default function App() {
       .then((m) => {
         const models = wantMock ? [...m.models, MOCK_ENTRY] : m.models
         const defaultId = models.some((x) => x.id === m.default) ? m.default : (models[0]?.id ?? '')
-        setManifest({ status: 'ready', models, defaultId, extras: m.extras ?? [] })
+        setManifest({ status: 'ready', models, defaultId, extras: m.extras ?? [], compare: m.compare ?? [] })
         setSelectedId(wantMock ? MOCK_ENTRY.id : defaultId)
       })
       .catch((err: unknown) => {
         // with ?mock=1 the site still works with no model files at all
         if (wantMock) {
-          setManifest({ status: 'ready', models: [MOCK_ENTRY], defaultId: MOCK_ENTRY.id, extras: [] })
+          setManifest({ status: 'ready', models: [MOCK_ENTRY], defaultId: MOCK_ENTRY.id, extras: [], compare: [] })
           setSelectedId(MOCK_ENTRY.id)
         } else {
           setManifest({ status: 'error', message: err instanceof Error ? err.message : String(err) })
@@ -109,7 +109,7 @@ export default function App() {
               )}
             </div>
             <div hidden={page !== 'compare'}>
-              {visited.has('compare') && <Compare models={manifest.models} defaultId={manifest.defaultId} extras={manifest.extras} />}
+              {visited.has('compare') && <Compare models={manifest.models} defaultId={manifest.defaultId} extras={manifest.extras} pair={manifest.compare} />}
             </div>
             <div hidden={page !== 'build'}>
               {visited.has('build') && <Build models={manifest.models} defaultId={manifest.defaultId} />}
