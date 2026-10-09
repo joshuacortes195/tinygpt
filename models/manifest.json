@@ -11,10 +11,10 @@
       "description": "The full model. About 3 hours of training on one GPU.",
       "path": "recipes",
       "examples": [
-        "Chocolate Chip Cookies\n\nIngredients:\n",
-        "Chicken Noodle Soup\n\nIngredients:\n",
-        "Banana Bread\n\nIngredients:\n",
-        "Garlic Butter Pasta\n\nIngredients:\n"
+        "Chocolate Chip Cookies",
+        "Chicken Noodle Soup",
+        "Banana Bread",
+        "Pizza"
       ],
       "format": "recipe"
     },
@@ -24,10 +24,10 @@
       "description": "A smaller model trained on the same recipes. Faster and a smaller download, but less accurate.",
       "path": "recipes-small",
       "examples": [
-        "Chocolate Chip Cookies\n\nIngredients:\n",
-        "Chicken Noodle Soup\n\nIngredients:\n",
-        "Banana Bread\n\nIngredients:\n",
-        "Garlic Butter Pasta\n\nIngredients:\n"
+        "Chocolate Chip Cookies",
+        "Chicken Noodle Soup",
+        "Banana Bread",
+        "Pizza"
       ],
       "format": "recipe"
     }
